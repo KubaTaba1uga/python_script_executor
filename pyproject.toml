@@ -7,6 +7,7 @@ authors = ["KubaTaba1uga <jakub@buczynski.net.pl>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 pytest = "^6.2.5"
+pexpect = "^4.8.0"
 
 [tool.poetry.dev-dependencies]
 
