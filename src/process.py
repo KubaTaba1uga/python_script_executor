@@ -14,4 +14,6 @@ class Process(PsutilProcess):
 
     @classmethod
     def is_sleeping(cls, pid: int):
-        return cls(pid).status() == "sleeping"
+        if cls.is_alive(pid):
+            return cls(pid).status() == "sleeping"
+        return False
