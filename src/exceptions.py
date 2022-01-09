@@ -13,7 +13,9 @@ class FileNotExecutable(PermissionError):
     pass
 
 
-class NoOutputProduced(TIMEOUT):
-    """If timeout is reached there are no more output from the commend"""
+class TimeoutReached(TIMEOUT):
+    pass
 
+
+class NoOutputProduced(Exception):
     pass
