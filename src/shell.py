@@ -8,7 +8,6 @@ Environment, in which scripts will be executed in
                                                   before script execution
 
 """
-import os
 import pathlib
 import pexpect
 
@@ -19,7 +18,7 @@ from src.exceptions import (
     TimeoutReached,
     NoOutputProduced,
 )
-from src.script import Script, ScriptName
+from src.script import Script
 from src.process import Process
 from src.output import OutputInput
 
@@ -27,7 +26,9 @@ from src.output import OutputInput
 def xyz_required(question: str) -> bool:
     input_invalid = True
     while input_invalid:
-        ask_for_input = input(question)
+        ask_for_input = input(question + " ([y]/n)" + " " * 4)
+        if not bool(ask_for_input):
+            ask_for_input = "y"
         if ask_for_input in (
             "y",
             "n",
@@ -40,13 +41,11 @@ def xyz_required(question: str) -> bool:
 
 
 def input_required() -> bool:
-    return xyz_required(
-        "Would You like to insert input into an script execution [y/n]?"
-    )
+    return xyz_required("Would You like to insert input into an script execution?")
 
 
 def termination_required() -> bool:
-    return xyz_required("Would You like to terminate script execution [y/n]?")
+    return xyz_required("Would You like to terminate script execution?")
 
 
 class Shell:

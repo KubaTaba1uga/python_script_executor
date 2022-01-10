@@ -2,6 +2,7 @@ import os
 import pathlib
 
 from src.app import SCRIPTS_FOLDER
+from src.exceptions import FileNotFound
 
 
 class ScriptName:
@@ -35,12 +36,22 @@ class ScriptName:
         return self.name
 
 
+"""
+TO-DO
+1. script.have_sheabang()
+2. script.find_sheabang()
+"""
+
+
 class Script:
     """Script which know how to read itself"""
 
     def __init__(self, name: str, folder_path: pathlib.Path = SCRIPTS_FOLDER):
         self.name = ScriptName(name)
         self.path = os.path.join(folder_path, pathlib.Path(str(name)))
+
+        if not self.path.exists():
+            raise FileNotFound(f"{self.path} not found")
 
     def __iter__(self):
         """Create generator to yield script lines"""
@@ -53,3 +64,9 @@ class Script:
 
     def __str__(self):
         return str(self.name)
+
+    def find_sheabang(self):
+        """Iterate over script to find #!<executable path>
+        Sheabag example:
+                #!/bin/bash
+        """
