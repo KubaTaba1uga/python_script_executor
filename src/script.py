@@ -46,6 +46,8 @@ TO-DO
 class Script:
     """Script which know how to read itself"""
 
+    SHEABANG = "#!"
+
     def __init__(self, name: str, folder_path: pathlib.Path = SCRIPTS_FOLDER):
         self.name = ScriptName(name)
         self.path = os.path.join(folder_path, pathlib.Path(str(name)))
@@ -67,6 +69,14 @@ class Script:
 
     def find_sheabang(self):
         """Iterate over script to find #!<executable path>
-        Sheabag example:
+        Sheabang example:
                 #!/bin/bash
         """
+        for line in self:
+            if self.SHEABANG in line:
+                return line[line.find(self.SHEABANG) + len(self.SHEABANG) :]
+        return ""
+
+    @classmethod
+    def is_sheabang(cls, line: str):
+        return
