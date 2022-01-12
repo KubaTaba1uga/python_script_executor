@@ -1,3 +1,3 @@
 from pathlib import Path
 
-SCRIPTS_FOLDER = Path("./scripts/")
+SCRIPTS_FOLDER = Path("./tests/scripts/")

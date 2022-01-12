@@ -8,6 +8,7 @@ authors = ["KubaTaba1uga <jakub@buczynski.net.pl>"]
 python = "^3.10"
 pytest = "^6.2.5"
 pexpect = "^4.8.0"
+psutil = "^5.9.0"
 
 [tool.poetry.dev-dependencies]
 

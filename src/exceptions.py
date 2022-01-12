@@ -19,3 +19,11 @@ class TimeoutReached(TIMEOUT):
 
 class NoOutputProduced(Exception):
     pass
+
+
+class NoShebangError(Exception):
+    """Error is caused by absence of shebang inside a script.
+    What is shebang??
+            Shebang is interpreter directive with syntax:
+                    #! <interpreter path> [optional-arg]
+    """

@@ -1,7 +1,5 @@
 import abc
 
-from src.script import ScriptName
-
 
 class OutputInput(abc.ABC):
     """Class responsible for printing stdout,
@@ -24,11 +22,11 @@ class OutputInput(abc.ABC):
         self.std_input = input("Input: ")
 
     @abc.abstractclassmethod
-    def print_success(cls, script_name: ScriptName):
+    def print_success(cls, script_name: str):
         print(f"Execution of {script_name} succeed")
 
     @abc.abstractclassmethod
-    def print_failure(cls, script_name: ScriptName):
+    def print_failure(cls, script_name: str):
         print(f"Execution of {script_name} failed")
 
 
@@ -43,9 +41,9 @@ class TerminalOutput(OutputInput):
         self.std_input = input("Input: ")
 
     @classmethod
-    def print_success(cls, script_name: ScriptName):
+    def print_success(cls, script_name: str):
         print(f"Execution of {script_name} succeed")
 
     @classmethod
-    def print_failure(cls, script_name: ScriptName):
+    def print_failure(cls, script_name: str):
         print(f"Execution of {script_name} failed")
