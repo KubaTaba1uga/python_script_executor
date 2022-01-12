@@ -5,11 +5,12 @@ from psutil import NoSuchProcess
 class Process(PsutilProcess):
     @classmethod
     def is_alive(cls, pid: int):
-        is_alive = True
         try:
             cls(pid)
         except NoSuchProcess:
             is_alive = False
+        else:
+            is_alive = True
         return is_alive
 
     @classmethod

@@ -1,12 +1,12 @@
 import pytest
 
 from src.script import Script
-from src.exceptions import NoSheabangError
+from src.exceptions import NoShebangError
 from tests.config import SCRIPTS_FOLDER
 
-GOOD_SCRIPT = {"name": "bash_sheabang_0.sh", "sheabang_path": "/bin/bash"}
+GOOD_SCRIPT = {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"}
 
-BAD_SCRIPT = {"name": "bash_no_sheabang.sh", "sheabang_path": ""}
+BAD_SCRIPT = {"name": "bash_no_shebang.sh", "shebang_path": ""}
 
 
 @pytest.fixture
@@ -26,10 +26,10 @@ def test_script_iteration(script):
             assert line == script_file.readline()
 
 
-def test_script_find_sheabang_path(script):
-    assert script.find_sheabang_path() == GOOD_SCRIPT["sheabang_path"]
+def test_script_find_shebang_path(script):
+    assert script.find_shebang_path() == GOOD_SCRIPT["shebang_path"]
 
 
-def test_script_cant_find_sheabang_path(bad_script):
-    with pytest.raises(NoSheabangError):
-        bad_script.find_sheabang_path()
+def test_script_cant_find_shebang_path(bad_script):
+    with pytest.raises(NoShebangError):
+        bad_script.find_shebang_path()

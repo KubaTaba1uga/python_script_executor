@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from src.app import SCRIPTS_FOLDER
-from src.exceptions import FileNotFound, NoSheabangError
+from src.exceptions import FileNotFound, NoShebangError
 
 
 class _ScriptName:
@@ -48,9 +48,9 @@ class _ScriptName:
 class Script:
     """Script which know how to read itself"""
 
-    SHEABANG = "#!"
+    SHEBANG = "#!"
 
-    SHEABANG_REGEX = re.compile(r"#![/\\](?:(?!\.\s+)\S)+(\S)?(\.)?")
+    SHEBANG_REGEX = re.compile(r"#![/\\](?:(?!\.\s+)\S)+(\S)?(\.)?")
 
     def __init__(self, name: str, folder_path: Path = SCRIPTS_FOLDER):
         self.name = _ScriptName(name)
@@ -71,33 +71,33 @@ class Script:
     def __str__(self):
         return str(self.name)
 
-    def find_sheabang_path(self) -> str:
+    def find_shebang_path(self) -> str:
         """Iterate script line by line to find #!<executable path>
-        Sheabang example:
+        Shebang example:
                 #!/bin/bash
 
-        If no sheabang is found raise NoSheabangError.
+        If no shebang is found raise NoShebangError.
         """
         for line in self:
-            if self._is_sheabang(line):
-                return self._extract_sheabang_path(line)
-        raise NoSheabangError(f"No sheabang found in {self.name}")
+            if self._is_shebang(line):
+                return self._extract_shebang_path(line)
+        raise NoShebangError(f"No shebang found in {self.name}")
 
     @classmethod
-    def _find_sheabang(cls, line: str) -> str:
-        """Find sheabang in line.
-        If sheabang is not exsisting return empty str.
-        It is used by `is_sheabang` to recognize  sheabang lines."""
-        if sheabang := cls.SHEABANG_REGEX.match(line):
-            return sheabang.string
+    def _find_shebang(cls, line: str) -> str:
+        """Find shebang in line.
+        If shebang is not exsisting return empty str.
+        It is used by `is_shebang` to recognize  shebang lines."""
+        if shebang := cls.SHEBANG_REGEX.match(line):
+            return shebang.string
         return ""
 
     @classmethod
-    def _extract_sheabang_path(cls, line: str) -> str:
-        """Slice string to create valid path (without sheabang or newline)"""
+    def _extract_shebang_path(cls, line: str) -> str:
+        """Slice string to create valid path (without shebang or newline)"""
         return line.replace("#!", "").replace("\n", "")
 
     @classmethod
-    def _is_sheabang(cls, line: str) -> bool:
-        """Decide is line containing a sheabang"""
-        return bool(cls._find_sheabang(line))
+    def _is_shebang(cls, line: str) -> bool:
+        """Decide is line containing a shebang"""
+        return bool(cls._find_shebang(line))
