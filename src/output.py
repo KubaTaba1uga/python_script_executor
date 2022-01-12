@@ -1,25 +1,25 @@
 import abc
 
 
+class BaseDescriptor(abc.ABC):
+    def __set_name__(self, cls, name):
+        self.name = name
+
+    @abc.abstractmethod
+    def __set__(self, instance, value):
+        instance.__dict__[self.name] = value
+
+    @abc.abstractmethod
+    def __get__(self, instance, cls):
+        return instance.__dict__[self.name]
+
+
 class OutputInput(abc.ABC):
-    """Class responsible for printing stdout,
-    and asking for user input"""
+    """Class responsible for receiving stdout,
+    stderr and stdin.
 
-    def __init__(self):
-        self.std_output = None
-        self.std_input = None
-
-    @abc.abstractmethod
-    def write_output(self, output: str):
-        self.std_output = output
-
-    @abc.abstractmethod
-    def print_output(self):
-        print(self.std_output)
-
-    @abc.abstractmethod
-    def ask_for_input(self):
-        self.std_input = input("Input: ")
+    Use descriptors to override abstract class properties.
+    """
 
     @abc.abstractclassmethod
     def print_success(cls, script_name: str):
@@ -29,16 +29,55 @@ class OutputInput(abc.ABC):
     def print_failure(cls, script_name: str):
         print(f"Execution of {script_name} failed")
 
+    @property
+    @abc.abstractclassmethod
+    def stdin(cls):
+        return cls.stdin
 
-class TerminalOutput(OutputInput):
-    def write_output(self, output: str):
-        self.std_output = output
+    @property
+    @abc.abstractclassmethod
+    def stdout(cls):
+        return cls.stdout
 
-    def print_output(self):
-        print(self.std_output)
+    @property
+    @abc.abstractclassmethod
+    def stderr(cls):
+        return cls.stderr
 
-    def ask_for_input(self):
-        self.std_input = input("Input: ")
+
+class TerminalOutputDescriptor(BaseDescriptor):
+    def __set__(self, instance, value):
+        print(value)
+        instance.__dict__[self.name] = value
+
+    def __get__(self, instance, cls):
+        return instance.__dict__[self.name]
+
+
+class TerminalInputDescriptor(BaseDescriptor):
+    def __set__(self, instance, value):
+        value = input("\n" + "Input: ")
+        instance.__dict__[self.name] = value
+
+    def __get__(self, instance, cls):
+        return instance.__dict__[self.name]
+
+
+class TerminalErrorDescriptor(BaseDescriptor):
+    def __set__(self, instance, value):
+
+        print("ERROR\n" + " " * 4 + f"{value}" + "\nERROR")
+
+        instance.__dict__[self.name] = value
+
+    def __get__(self, instance, cls):
+        return instance.__dict__[self.name]
+
+
+class TerminalOutputInput(OutputInput):
+    stdin = TerminalInputDescriptor()
+    stdout = TerminalOutputDescriptor()
+    stderr = TerminalErrorDescriptor()
 
     @classmethod
     def print_success(cls, script_name: str):

@@ -1,8 +1,9 @@
 import pytest
 
 from src.script import Script
-from src.exceptions import NoShebangError
+from src.exceptions import NoShebangError, FileNotFound
 from tests.config import SCRIPTS_FOLDER
+from tests.fixtures import non_existing_path
 
 GOOD_SCRIPT = {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"}
 
@@ -17,6 +18,11 @@ def script():
 @pytest.fixture
 def bad_script():
     return Script(BAD_SCRIPT["name"], SCRIPTS_FOLDER)
+
+
+def test_script__init__error(non_existing_path):
+    with pytest.raises(FileNotFound):
+        Script(GOOD_SCRIPT["name"], non_existing_path)
 
 
 def test_script_iteration(script):

@@ -52,6 +52,9 @@ class Shell:
     """Shell module is responsible for spawning the environment
     and for communicating with it."""
 
+    # Temporary file handling errors content
+    ERROR_FILE_NAME = "errors.file"
+
     def __init__(self, path: pathlib.Path):
         """path should be pointing to executable shell
         like /usr/bin/python3"""
@@ -66,15 +69,13 @@ class Shell:
 
     def spawn_shell(self, script: Script):
         """Spawn shell using self.path, and execute script within it."""
-        try:
-            self.process = pexpect.spawn(
-                str(self.path), args=[str(script.path)], encoding="utf-8"
-            )
-            self.script = script
-        except pexpect.ExceptionPexpect as err:
-            raise FileNotFoundOrNotExecutable from err
+        self.process = pexpect.spawn(
+            str(self.path),
+            args=[str(script.path), f"2> {self.ERROR_FILE_NAME}"],
+            encoding="utf-8",
+        )
 
-    def send_command(self, command: str):
+    def _send_command(self, command: str):
         self.process.sendline(command)
 
     def execute_script(self, script: Script, output_input: OutputInput, timeout=30):
@@ -82,7 +83,7 @@ class Shell:
         while self.process.isalive():
             # Read output from script
             try:
-                output_input.write_output(self.read_output(timeout))
+                output_input.write_output(self._read_output(timeout))
             except NoOutputProduced:
                 output_input.write_output(
                     f"There where no output produced by {script.name}"
@@ -95,7 +96,7 @@ class Shell:
 
                 if input_required():
                     output_input.ask_for_input()
-                    self.send_command(output_input.std_input)
+                    self._send_command(output_input.std_input)
                 elif termination_required():
                     self.process.terminate()
 
@@ -104,7 +105,7 @@ class Shell:
         else:
             output_input.print_failure(script.name)
 
-    def read_output(self, timeout=30) -> str:
+    def _read_output(self, timeout=30) -> str:
         """Read all output lines from shell. If output is not
         recived before timeout return what left"""
         try:
