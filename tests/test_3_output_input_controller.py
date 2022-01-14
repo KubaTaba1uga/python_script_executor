@@ -1,12 +1,12 @@
+from contextlib import contextmanager
 from pathlib import Path
 from io import StringIO
-from contextlib import contextmanager
 import sys
 
 import pytest
 
+from src.output_input_controller import TerminalOutputInput, OutputInputController
 from src.shell import Shell
-from src.output_input_controller import TerminalOutputInput
 
 
 @pytest.fixture
@@ -45,3 +45,12 @@ def test_terminal_input(shell, terminal_oi):
     with replace_stdin(input_notification):
         terminal_oi.stdin = shell, None
         assert terminal_oi.stdin == input_notification
+        # Prettify pytest -s formatting
+        print(terminal_oi.stdin)
+
+
+def test_command_line_flags():
+    """Ensure each OIController subclass has
+    command line flag implemented properly"""
+    for cls in OutputInputController.__subclasses__():
+        assert cls.command_line_flag[0] == "-"
