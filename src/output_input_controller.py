@@ -96,8 +96,18 @@ class TerminalInputDescriptor(BaseDescriptor):
 class TerminalErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, value_tuple):
         _shell, value = value_tuple
-
-        print("ERROR\n" + " " * 4 + f"{value}" + "\nERROR")
+        double_newline = "\n" * 2
+        tab = " " * 4
+        print(
+            double_newline
+            + "ERROR!!!"
+            + double_newline
+            + tab
+            + f"{value}"
+            + double_newline
+            + "ERROR!!!",
+            end=double_newline,
+        )
 
         instance.__dict__[self.name] = value
 
