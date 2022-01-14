@@ -63,14 +63,17 @@ class OutputInputController(abc.ABC):
     @abc.abstractclassmethod
     def command_line_flag(cls):
         """Flag that user passes at script execution, example: python start.py -s
-        it is used for app to know which OutputInputController
-        child should be used"""
+        it is used for app to know which OutputInputController should be used.
+        """
         return "-s"
 
 
 class TerminalOutputDescriptor(BaseDescriptor):
     def __set__(self, instance, value_tuple):
         _shell, value = value_tuple
+
+        print(value)
+
         instance.__dict__[self.name] = value
 
     def __get__(self, instance, cls):
@@ -80,7 +83,7 @@ class TerminalOutputDescriptor(BaseDescriptor):
 class TerminalInputDescriptor(BaseDescriptor):
     def __set__(self, instance, value_tuple):
         """When revoked ask user for input,
-        instead of using value_tuple parameter"""
+        instead of using value_tuple[1] parameter"""
 
         value = input("\n" + "Input: ")
 
@@ -93,6 +96,7 @@ class TerminalInputDescriptor(BaseDescriptor):
 class TerminalErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, value_tuple):
         _shell, value = value_tuple
+
         print("ERROR\n" + " " * 4 + f"{value}" + "\nERROR")
 
         instance.__dict__[self.name] = value
@@ -105,3 +109,4 @@ class TerminalOutputInput(OutputInputController):
     stdin = TerminalInputDescriptor()
     stdout = TerminalOutputDescriptor()
     stderr = TerminalErrorDescriptor()
+    command_line_flag = "-t"

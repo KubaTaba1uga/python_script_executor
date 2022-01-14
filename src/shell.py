@@ -1,6 +1,6 @@
 """
-Environment, in which scripts will be executed in
-        is precized by script first line. Example:
+Environment, in which scripts will be executed in,
+        it is precized by script first line. Example:
                 #!/bin/bash - spawn shell /bin/bash
                                         before script execution
 
@@ -13,41 +13,13 @@ from pathlib import Path
 import pexpect
 
 from src.exceptions import (
-    FileNotFoundOrNotExecutable,
     FileNotFound,
     FileNotExecutable,
-    TimeoutReached,
     NoOutputProduced,
 )
 from src.script import Script
 from src.process import Process
-from src.output import OutputInput
-
-
-def xyz_required(question: str) -> bool:
-    """Ask question until correct choice is not provided"""
-    input_invalid = True
-    while input_invalid:
-        ask_for_input = input(question + " ([y]/n)" + " " * 2)
-        if not bool(ask_for_input):
-            ask_for_input = "y"
-        if ask_for_input in (
-            "y",
-            "n",
-        ):
-            input_invalid = False
-        else:
-            print("Input invalid!!!")
-
-    return ask_for_input == "y"
-
-
-def input_required() -> bool:
-    return xyz_required("Would You like to insert input into an script execution?")
-
-
-def termination_required() -> bool:
-    return xyz_required("Would You like to terminate script execution?")
+from src.output_input_controller import OutputInputController
 
 
 class _ErrorTempFile:
@@ -103,20 +75,27 @@ class Shell:
     def terminate(self):
         self.process.terminate()
 
-    def execute_script(self, script: Script, output_input: OutputInput, timeout=30):
+    def execute_script(
+        self, script: Script, output_input: OutputInputController, timeout=30
+    ):
         self.spawn_shell(script)
         while self.process.isalive():
             try:
                 # Pass shell, to allow controll of process by output_input
                 #       for future output analysis extending
-                output_input.stdout = (self, self._read_output(timeout))
+                output_input.stdout = self, self._read_output(timeout)
             except NoOutputProduced as err:
-                output_input.stdout = (self, err.args[0])
+                output_input.stdout = self, err.args[0]
 
             if _ErrorTempFile.errors_exist():
                 # Pass shell, to allow controll of process by output_input
                 #       for future extending error response
-                output_input.stderr = (self, _ErrorTempFile.read_errors())
+                output_input.stderr = self, _ErrorTempFile.read_errors()
+
+            if Process.is_sleeping(self.process.pid):
+                # Pass shell, to allow comunication with process by
+                #       output_input
+                output_input.stdin = self, None
 
         if self.process.status == 0:
             output_input.print_success(script.name)
@@ -131,7 +110,7 @@ class Shell:
         except pexpect.TIMEOUT as err:
             if not self.process.before:
                 raise NoOutputProduced(
-                    "There is no output produced by {script_name}"
+                    f"There is no output produced by {script_name}"
                 ) from err
 
         return self.process.before
