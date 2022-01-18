@@ -23,7 +23,14 @@ OUTPUT_SCRIPT = {"name": "bash_output_1.sh"}
 
 INPUT_SCRIPT = {"name": "bash_input_2.sh"}
 
+SHELL_SCRIPT = {"name": "bash_shell.sh"}
+
 BASH_SHELL_PATH = Path("/bin/bash")
+
+
+@pytest.fixture
+def bash_shell_script():
+    return Script(SHELL_SCRIPT["name"], SCRIPTS_FOLDER)
 
 
 @pytest.fixture
