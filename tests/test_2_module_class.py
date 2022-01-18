@@ -2,14 +2,7 @@ import os
 
 import pytest
 
-from src.app import SCRIPTS_FOLDER
-from src.script import Script
-from src.module import Module
-
-
-@pytest.fixture
-def module():
-    return Module()
+from tests.fixtures import module
 
 
 def test_sorted_scripts(module):

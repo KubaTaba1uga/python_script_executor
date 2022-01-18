@@ -2,22 +2,7 @@ import pytest
 
 from src.script import Script
 from src.exceptions import NoShebangError, FileNotFound
-from tests.config import SCRIPTS_FOLDER
-from tests.fixtures import non_existing_path
-
-GOOD_SCRIPT = {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"}
-
-BAD_SCRIPT = {"name": "bash_no_shebang.sh", "shebang_path": ""}
-
-
-@pytest.fixture
-def script():
-    return Script(GOOD_SCRIPT["name"], SCRIPTS_FOLDER)
-
-
-@pytest.fixture
-def bad_script():
-    return Script(BAD_SCRIPT["name"], SCRIPTS_FOLDER)
+from tests.fixtures import non_existing_path, script, bad_script, GOOD_SCRIPT
 
 
 def test_script__init__error(non_existing_path):

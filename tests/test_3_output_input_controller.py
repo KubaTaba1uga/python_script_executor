@@ -5,19 +5,8 @@ import sys
 
 import pytest
 
-from src.output_input_controller import TerminalOutputInput, OutputInputController
-from src.shell import Shell
-
-
-@pytest.fixture
-def shell():
-    shell_path = Path("/bin/bash")
-    return Shell(shell_path)
-
-
-@pytest.fixture
-def terminal_oi():
-    return TerminalOutputInput()
+from tests.fixtures import shell, terminal_oi
+from src.output_input_controller import OutputInputController
 
 
 @contextmanager

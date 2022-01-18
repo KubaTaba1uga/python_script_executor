@@ -61,7 +61,7 @@ class Shell:
         self.process = None
         self.script = None
 
-    def spawn_shell(self, script: Script):
+    def _spawn_shell(self, script: Script):
         """Spawn shell using self.path, and execute script within it."""
         self.process = pexpect.spawn(
             str(self.path),
@@ -78,23 +78,23 @@ class Shell:
     def execute_script(
         self, script: Script, output_input: OutputInputController, timeout=30
     ):
-        self.spawn_shell(script)
+        self._spawn_shell(script)
+
         while self.process.isalive():
+
             try:
-                # Pass shell, to allow controll of process by output_input
-                #       for future output analysis extending
+                # Pass shell, to allow controll of process by output_input.stdout
                 output_input.stdout = self, self._read_output(timeout)
             except NoOutputProduced as err:
                 output_input.stdout = self, err.args[0]
 
             if _ErrorTempFile.errors_exist():
-                # Pass shell, to allow controll of process by output_input
-                #       for future extending error response
+                # Pass shell, to allow controll of process by output_input.stderr
                 output_input.stderr = self, _ErrorTempFile.read_errors()
 
             if Process.is_sleeping(self.process.pid):
                 # Pass shell, to allow comunication with process by
-                #       output_input
+                #       output_input.stdin
                 output_input.stdin = self, None
 
         if self.process.status == 0:
