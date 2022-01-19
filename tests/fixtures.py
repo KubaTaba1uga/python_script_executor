@@ -25,7 +25,14 @@ INPUT_SCRIPT = {"name": "bash_input_2.sh"}
 
 SHELL_SCRIPT = {"name": "bash_shell.sh"}
 
+ERROR_SCRIPT = {"name": "bash_error_4.sh"}
+
 BASH_SHELL_PATH = Path("/bin/bash")
+
+
+@pytest.fixture
+def bash_error_script():
+    return Script(ERROR_SCRIPT["name"], SCRIPTS_FOLDER)
 
 
 @pytest.fixture

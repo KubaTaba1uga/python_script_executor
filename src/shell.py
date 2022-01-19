@@ -38,7 +38,10 @@ class _ErrorTempFile:
 
     @classmethod
     def errors_exist(cls):
-        """If there is any content inside temp file return True"""
+        if not Path(cls.FILE_NAME).exists():
+            return False
+
+        # If there is any content inside temp file return True
         with open(cls.FILE_NAME) as temp_errors:
             # Delete whitespaces which could be misleading
             #   for bool function
@@ -65,7 +68,7 @@ class Shell:
         """Spawn shell using self.path, and execute script within it."""
         self.process = pexpect.spawn(
             str(self.path),
-            args=[str(script.path), f"2> {_ErrorTempFile.FILE_NAME}"],
+            args=["str(script.path) 2> {_ErrorTempFile.FILE_NAME}"],
             encoding="utf-8",
         )
 
@@ -83,13 +86,15 @@ class Shell:
         while self.process.isalive():
 
             try:
-                # Pass shell, to allow controll of process by output_input.stdout
+                # Pass shell, to allow controll of process by
+                #       output_input.stdout
                 output_input.stdout = self, self._read_output(timeout)
             except NoOutputProduced as err:
                 output_input.stdout = self, err.args[0]
 
             if _ErrorTempFile.errors_exist():
-                # Pass shell, to allow controll of process by output_input.stderr
+                # Pass shell, to allow controll of process by
+                #       output_input.stderr
                 output_input.stderr = self, _ErrorTempFile.read_errors()
 
             if Process.is_sleeping(self.process.pid):
