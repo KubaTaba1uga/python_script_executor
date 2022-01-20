@@ -46,7 +46,7 @@ class _ScriptName:
 
 
 class Script:
-    """Script which know how to read itself"""
+    """Script which know how to read and execute itself"""
 
     SHEBANG = "#!"
 

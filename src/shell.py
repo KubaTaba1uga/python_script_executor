@@ -9,6 +9,7 @@ Environment, in which scripts will be executed in,
 
 """
 from pathlib import Path
+import abc
 
 import pexpect
 
@@ -49,8 +50,18 @@ class _ErrorTempFile:
 
 
 class Shell:
-    """Shell module is responsible for spawning the environment
-    and for communicating with it."""
+    """Shell module is responsible for spawning the  environment
+    in which scripts will be executed and for communicating with them."""
+
+    @property
+    @abc.abstractclassmethod
+    def path(cls):
+        """Path to shell in which scripts will be executed, for example:
+        /bin/bash
+        /bin/env zsh
+        /bin/sh
+        """
+        return cls.path
 
     def __init__(self, path: Path):
         """path should be pointing to executable shell
@@ -64,48 +75,60 @@ class Shell:
         self.process = None
         self.script = None
 
-    def _spawn_shell(self, script: Script):
+    def _spawn_shell(self):
         """Spawn shell using self.path, and execute script within it."""
         self.process = pexpect.spawn(
             str(self.path),
-            args=["str(script.path) 2> {_ErrorTempFile.FILE_NAME}"],
             encoding="utf-8",
         )
 
     def send_command(self, command: str):
+        """Send command to shell"""
         self.process.sendline(command)
 
     def terminate(self):
+        """Terminate shell, when no scripts are left for execution"""
         self.process.terminate()
+
+    def get_script_exit_code(self):
+        """Get exit code of last executed script"""
+        tag = "return_code="
+        command = "$?"
+        self.send_command(f"echo {tag}{command}")
+        output = self._read_output("Getting return code")
+        return output[output.find(tag) : len(command)]
 
     def execute_script(
         self, script: Script, output_input: OutputInputController, timeout=30
     ):
-        self._spawn_shell(script)
+        """Execute script as another process"""
+        if not self.process:
+            self._spawn_shell()
+        # self._spawn_shell(script)
 
-        while self.process.isalive():
+        # while self.process.isalive():
 
-            try:
-                # Pass shell, to allow controll of process by
-                #       output_input.stdout
-                output_input.stdout = self, self._read_output(timeout)
-            except NoOutputProduced as err:
-                output_input.stdout = self, err.args[0]
+        #     try:
+        #         # Pass shell, to allow controll of process by
+        #         #       output_input.stdout
+        #         output_input.stdout = self, self._read_output(timeout)
+        #     except NoOutputProduced as err:
+        #         output_input.stdout = self, err.args[0]
 
-            if _ErrorTempFile.errors_exist():
-                # Pass shell, to allow controll of process by
-                #       output_input.stderr
-                output_input.stderr = self, _ErrorTempFile.read_errors()
+        #     if _ErrorTempFile.errors_exist():
+        #         # Pass shell, to allow controll of process by
+        #         #       output_input.stderr
+        #         output_input.stderr = self, _ErrorTempFile.read_errors()
 
-            if Process.is_sleeping(self.process.pid):
-                # Pass shell, to allow comunication with process by
-                #       output_input.stdin
-                output_input.stdin = self, None
+        #     if Process.is_sleeping(self.process.pid):
+        #         # Pass shell, to allow comunication with process by
+        #         #       output_input.stdin
+        #         output_input.stdin = self, None
 
-        if self.process.status == 0:
-            output_input.print_success(script.name)
-        else:
-            output_input.print_failure(script.name)
+        # if self.process.status == 0:
+        #     output_input.print_success(script.name)
+        # else:
+        #     output_input.print_failure(script.name)
 
     def _read_output(self, script_name: str, timeout=30) -> str:
         """Read all output lines from shell. If output is not
