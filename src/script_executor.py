@@ -1,6 +1,7 @@
 from src.output_input_controller import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
-from src.exceptions import NoPidError, NoExitCodeError
+from src.exceptions import NoPidError, NoExitCodeError, NoOutputProduced
+from src.process import Process
 from src.script import Script
 from src.shell import Shell
 
@@ -28,12 +29,12 @@ class ScriptExecutor:
 
     @classmethod
     def _create_pid_command(cls):
-        command = "$$"
+        command = "$BASHPID"
         return f"echo {cls.pid_tag}{command}"
 
     @classmethod
     def _is_pid(cls, output: str) -> bool:
-        if "$$" in output:
+        if "$BASHPID" in output:
             # Avoid recognizing execution command as pid
             return False
         return cls.pid_tag in output
@@ -62,7 +63,7 @@ class ScriptExecutor:
         for line in self.shell:
             if self._is_pid(line):
                 return self._extract_pid(line)
-        raise NoPidError(f"No exit code found for {self.script}")
+        raise NoPidError(f"No pid found for {self.script}")
 
     def _find_exit_code(self) -> int:
         for line in self.shell:
@@ -70,25 +71,32 @@ class ScriptExecutor:
                 return self._extract_exit_code(line)
         raise NoExitCodeError(f"No exit code found for {self.script}")
 
-    def _get_last_exit_code(self):
+    @property
+    def pid(self) -> int:
+        return int(self._find_pid())
+
+    @property
+    def exit_code(self) -> int:
         """Get exit code of last executed process"""
         command = "$?"
         self.shell.send_command(f"echo {self.exit_code_tag}{command}")
-        return self._find_exit_code()
+        return int(self._find_exit_code())
 
     def _create_execution_command(self) -> str:
-        """Create command which will generate child process
-        PID and execute command under that PID.
+        """Create subshell and return its PID. Script
+        will be executed within a subshell by command
+        syntax.
+        Because of subshell child PID will be different
+        than parent shell PID.
 
-        Generated pid will be used to recognize process status
+        Generated PID will be used to recognize process status
         like:
                 terminated
                 hang up
                 suspend
         """
 
-        shell_path, pid_command, interpreter_path, script_path, error_redirection = (
-            self.shell.path,
+        pid_command, interpreter_path, script_path, error_redirection = (
             self._create_pid_command(),
             self.script.find_shebang_path(),
             self.script.path,
@@ -96,19 +104,45 @@ class ScriptExecutor:
         )
 
         return (
-            # Execute command by shell as string
-            f"{shell_path} -c"
+            # Subshell char start
+            "("
             # Create pid before execution
-            + f' "{pid_command};'
+            + f"{pid_command} && "
             # Execute under the pid
             + f"exec {interpreter_path} {script_path}"
             # Redirect errors to temporary file
-            + f'{error_redirection}"'
+            + f"{error_redirection}"
+            # Subshell char end
+            + ")"
+            # Disable user settings to get clean output
+            # + " --norc"
         )
+
+    def get_output(self):
+        try:
+            output = self.shell, self.shell.read_output_all(self.script)
+        except NoOutputProduced as err:
+            output = self.shell, err.args[0]
+        self.oi_controller.stdout = output
 
     def execute_script(self):
         """Execute script as another process"""
+        if not self.shell.process:
+            self.shell.spawn_shell()
 
+        command = self._create_execution_command()
+
+        self.shell.send_command(command)
+
+        pid = self.pid
+
+        while Process.is_alive(pid):
+            # self.get_output()
+            print(pid, "\n")
+            print(self.shell.process.pid)
+            from time import sleep
+
+            sleep(100)
         # self._spawn_shell(script)
 
         # while self.process.isalive():
@@ -150,22 +184,27 @@ shell.spawn_shell()
 
 executor = ScriptExecutor(script, shell, term_oi)
 
+executor.execute_script()
+
 command = executor._create_execution_command()
 
-shell.send_command(command)
+# shell.send_command(command)
 
-pid = executor._find_pid()
+# pid = executor.pid
 
-exit_code = executor._get_last_exit_code()
+# output = shell.read_output_all(script.name)
+
+# exit_code = executor.exit_code
 
 
 print("command", command, end="\n" * 2)
 
-print("pid", pid, end="\n" * 2)
+# print("pid", pid, end="\n" * 2)
 
-print("exit_code", exit_code, end="\n" * 2)
+# print("exit_code", exit_code, end="\n" * 2)
 
+# print("output:")
+# print(output)
 
-# print(shell._read_output(script.name, 2))
 
 shell.terminate()
