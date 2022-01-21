@@ -89,3 +89,9 @@ class Shell(abc.ABC):
 
 class BashShell(Shell):
     path = "/bin/bash"
+
+    def spawn_shell(self, timeout=5):
+        """Spawn bash without user preferences to get cleaner output"""
+        self.process = pexpect.spawn(
+            self.path, args=["--norc"], encoding="utf-8", timeout=timeout
+        )

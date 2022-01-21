@@ -61,6 +61,7 @@ class ScriptExecutor:
 
     def _find_pid(self) -> int:
         for line in self.shell:
+            print(line)
             if self._is_pid(line):
                 return self._extract_pid(line)
         raise NoPidError(f"No pid found for {self.script}")
@@ -109,13 +110,13 @@ class ScriptExecutor:
             # Create pid before execution
             + f"{pid_command} && "
             # Execute under the pid
-            + f"exec {interpreter_path} {script_path}"
+            + f"exec {interpreter_path}"
+            # Script which will be executed
+            + f"{script_path}"
             # Redirect errors to temporary file
             + f"{error_redirection}"
             # Subshell char end
             + ")"
-            # Disable user settings to get clean output
-            # + " --norc"
         )
 
     def get_output(self):
@@ -137,12 +138,10 @@ class ScriptExecutor:
         pid = self.pid
 
         while Process.is_alive(pid):
-            # self.get_output()
-            print(pid, "\n")
-            print(self.shell.process.pid)
-            from time import sleep
+            self.get_output()
+            # print(pid, "\n")
+            # print(self.shell.process.pid)
 
-            sleep(100)
         # self._spawn_shell(script)
 
         # while self.process.isalive():
@@ -184,13 +183,13 @@ shell.spawn_shell()
 
 executor = ScriptExecutor(script, shell, term_oi)
 
-executor.execute_script()
+# executor.execute_script()
 
 command = executor._create_execution_command()
 
-# shell.send_command(command)
+shell.send_command(command)
 
-# pid = executor.pid
+pid = executor.pid
 
 # output = shell.read_output_all(script.name)
 
