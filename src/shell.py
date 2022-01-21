@@ -10,6 +10,9 @@ Environment, in which scripts will be executed in,
 """
 from pathlib import Path
 import abc
+import sys
+import os
+
 
 import pexpect
 
@@ -21,66 +24,40 @@ from src.exceptions import (
 from src.script import Script
 from src.process import Process
 from src.output_input_controller import OutputInputController
+from src.temporary_errors_buffer import TempErrorFile
 
 
-class _ErrorTempFile:
-    FILE_NAME = "errors_temp.log"
-
-    @classmethod
-    def read_errors(cls):
-        """Read errors from file and clean buffer"""
-        with open(cls.FILE_NAME, "r+") as temp_errors:
-            error_content = temp_errors.read()
-            # Move pointer to file beginning
-            temp_errors.seek(0)
-            # Resize file to pointer position
-            temp_errors.truncate()
-        return error_content
-
-    @classmethod
-    def errors_exist(cls):
-        if not Path(cls.FILE_NAME).exists():
-            return False
-
-        # If there is any content inside temp file return True
-        with open(cls.FILE_NAME) as temp_errors:
-            # Delete whitespaces which could be misleading
-            #   for bool function
-            return bool(temp_errors.read().strip())
-
-
-class Shell:
+class Shell(abc.ABC):
     """Shell module is responsible for spawning the  environment
     in which scripts will be executed and for communicating with them."""
 
     @property
     @abc.abstractclassmethod
     def path(cls):
-        """Path to shell in which scripts will be executed, for example:
+        """Path to shell by which all scripts will be executed, for example:
         /bin/bash
         /bin/env zsh
         /bin/sh
         """
         return cls.path
 
-    def __init__(self, path: Path):
-        """path should be pointing to executable shell
-        like /usr/bin/python3"""
+    def __init__(self):
+        path = Path(self.path)
+
         if not path.exists():
             raise FileNotFound(f"{path} not found")
         if not pexpect.utils.is_executable_file(path):
             raise FileNotExecutable(f"{path} is not executable")
 
-        self.path = path
         self.process = None
-        self.script = None
 
-    def _spawn_shell(self):
+    def __iter__(self):
+        while line := self.read_output_line():
+            yield line
+
+    def spawn_shell(self, timeout=5):
         """Spawn shell using self.path, and execute script within it."""
-        self.process = pexpect.spawn(
-            str(self.path),
-            encoding="utf-8",
-        )
+        self.process = pexpect.spawn(self.path, encoding="utf-8", timeout=timeout)
 
     def send_command(self, command: str):
         """Send command to shell"""
@@ -90,51 +67,11 @@ class Shell:
         """Terminate shell, when no scripts are left for execution"""
         self.process.terminate()
 
-    def get_script_exit_code(self):
-        """Get exit code of last executed script"""
-        tag = "return_code="
-        command = "$?"
-        self.send_command(f"echo {tag}{command}")
-        output = self._read_output("Getting return code")
-        return output[output.find(tag) : len(command)]
-
-    def execute_script(
-        self, script: Script, output_input: OutputInputController, timeout=30
-    ):
-        """Execute script as another process"""
-        if not self.process:
-            self._spawn_shell()
-        # self._spawn_shell(script)
-
-        # while self.process.isalive():
-
-        #     try:
-        #         # Pass shell, to allow controll of process by
-        #         #       output_input.stdout
-        #         output_input.stdout = self, self._read_output(timeout)
-        #     except NoOutputProduced as err:
-        #         output_input.stdout = self, err.args[0]
-
-        #     if _ErrorTempFile.errors_exist():
-        #         # Pass shell, to allow controll of process by
-        #         #       output_input.stderr
-        #         output_input.stderr = self, _ErrorTempFile.read_errors()
-
-        #     if Process.is_sleeping(self.process.pid):
-        #         # Pass shell, to allow comunication with process by
-        #         #       output_input.stdin
-        #         output_input.stdin = self, None
-
-        # if self.process.status == 0:
-        #     output_input.print_success(script.name)
-        # else:
-        #     output_input.print_failure(script.name)
-
-    def _read_output(self, script_name: str, timeout=30) -> str:
+    def read_output_all(self, script_name: str) -> str:
         """Read all output lines from shell. If output is not
-        recived before timeout return what left"""
+        recived before timeout return what has left"""
         try:
-            self.process.expect(pexpect.EOF, timeout=timeout)
+            self.process.expect(pexpect.EOF)
         except pexpect.TIMEOUT as err:
             if not self.process.before:
                 raise NoOutputProduced(
@@ -142,3 +79,13 @@ class Shell:
                 ) from err
 
         return self.process.before
+
+    def read_output_line(self) -> str:
+        try:
+            return self.process.readline()
+        except pexpect.TIMEOUT:
+            return ""
+
+
+class BashShell(Shell):
+    path = "/bin/bash"

@@ -13,6 +13,17 @@ class _ScriptName:
     def __init__(self, name: str):
         self.name = name
 
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def is_number(cls, number: str):
+        try:
+            int(number)
+        except ValueError:
+            return False
+        return True
+
     def _find_last_underscore(self):
         return len(self.name) - self.name[::-1].find("_")
 
@@ -32,17 +43,6 @@ class _ScriptName:
 
     def is_script_numbered(self):
         return bool(self.find_script_number())
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def is_number(cls, number: str):
-        try:
-            int(number)
-        except ValueError:
-            return False
-        return True
 
 
 class Script:
@@ -71,18 +71,6 @@ class Script:
     def __str__(self):
         return str(self.name)
 
-    def find_shebang_path(self) -> str:
-        """Iterate script line by line to find #!<executable path>
-        Shebang example:
-                #!/bin/bash
-
-        If no shebang is found raise NoShebangError.
-        """
-        for line in self:
-            if self._is_shebang(line):
-                return self._extract_shebang_path(line)
-        raise NoShebangError(f"No shebang found in {self.name}")
-
     @classmethod
     def _find_shebang(cls, line: str) -> str:
         """Find shebang in line.
@@ -101,3 +89,18 @@ class Script:
     def _is_shebang(cls, line: str) -> bool:
         """Decide is line containing a shebang"""
         return bool(cls._find_shebang(line))
+
+    def find_shebang_path(self) -> str:
+        """Iterate script line by line to find shebang, when it is
+        found extract interpreter path from it.
+
+        Shebang example:
+                #!/bin/bash
+
+
+        If no shebang is found raise NoShebangError.
+        """
+        for line in self:
+            if self._is_shebang(line):
+                return self._extract_shebang_path(line)
+        raise NoShebangError(f"No shebang found in {self.name}")

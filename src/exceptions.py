@@ -27,3 +27,11 @@ class NoShebangError(Exception):
             Shebang is interpreter directive with syntax:
                     #! <interpreter path> [optional-arg]
     """
+
+
+class NoPidError(Exception):
+    """No pid were generated before process execution"""
+
+
+class NoExitCodeError(Exception):
+    """No exit code were produced by process"""
