@@ -128,7 +128,7 @@ class SubShell(Shell):
         return f"{cls.subshell['start']}{command}{cls.subshell['end']}"
 
     @classmethod
-    def _create_subshell_pid_command(cls) -> str:
+    def create_subshell_pid_command(cls) -> str:
         """Create command which will echo the PID
         of subshell in which it is being revoked.
         Like in sh $PPID. Adding tag before PID
@@ -183,19 +183,25 @@ class SubShell(Shell):
         raise NoPidError(f"No pid found for {self} subshell")
 
     def find_subshell_exit_code(self) -> int:
-        """Get exit code of last subshell"""
-        command = self._create_subshell_exit_code_command()
-        self.send_command(command)
+        """Find exit code of last subshell"""
         for line in self:
             if self._is_subshell_exit_code(line):
                 return self._extract_subshell_exit_code(line)
         raise NoExitCodeError(f"No exit code found for {self} subshell")
 
+    def get_subshell_exit_code(self) -> int:
+        command = self._create_subshell_exit_code_command()
+        self.send_command(command)
+        return self.find_subshell_exit_code()
+
 
 class BashShell(SubShell):
     path = "/bin/bash"
+
     subshell = {"start": "(", "end": ")"}
+
     subshell_pid = {"tag": "bash_subshell_pid=", "command": "$BASHPID"}
+
     subshell_exit_code = {"tag": "bash_subshell_exit_code=", "command": "$?"}
 
     def spawn_shell(self, timeout=5):

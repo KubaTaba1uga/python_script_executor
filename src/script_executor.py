@@ -7,7 +7,7 @@ from src.shell import SubShell
 
 
 class ScriptExecutor:
-    errors_buffer = TempErrorFile
+    errors_buffer = TempErrorFile()
     pid_tag = "pid="
     exit_code_tag = "exit_code="
 
@@ -34,7 +34,7 @@ class ScriptExecutor:
     @property
     def exit_code(self) -> int:
         """Get exit code of last executed process"""
-        return self.shell.find_subshell_exit_code()
+        return self.shell.get_subshell_exit_code()
 
     def _create_execution_command(self) -> str:
         """Create subshell and return its PID. Script
@@ -51,7 +51,7 @@ class ScriptExecutor:
         """
 
         pid_command, interpreter_path, script_path, error_redirection = (
-            self.shell._create_subshell_pid_command(),
+            self.shell.create_subshell_pid_command(),
             self.script.find_shebang_path(),
             self.script.path,
             self.errors_buffer.create_error_redirection(),
@@ -72,12 +72,20 @@ class ScriptExecutor:
             + ")"
         )
 
-    def get_output(self):
+    def get_output(self, subshell_pid):
         try:
             output = self.shell, self.shell.read_output_all(self.script)
         except NoOutputProduced as err:
             output = self.shell, err.args[0]
         self.oi_controller.stdout = output
+
+    def get_errors(self, subshell_pid):
+        if self.errors_buffer.exist():
+            self.oi_controller.stderr = self.shell, self.errors_buffer.read()
+
+    def get_input(self, subshell_pid):
+        if Process.is_sleeping(subshell_pid):
+            self.oi_controller.stdin = self.shell, None
 
     def execute_script(self):
         """Execute script as another process"""
@@ -91,36 +99,14 @@ class ScriptExecutor:
         pid = self.pid
 
         while Process.is_alive(pid):
-            self.get_output()
+            self.get_output(pid)
+            self.get_errors(pid)
+            self.get_input(pid)
 
-            # print(pid, "\n")
-            # print(self.shell.process.pid)
-
-        # self._spawn_shell(script)
-
-        # while self.process.isalive():
-
-        #     try:
-        #         # Pass shell, to allow controll of process by
-        #         #       output_input.stdout
-        #         output_input.stdout = self, self._read_output(timeout)
-        #     except NoOutputProduced as err:
-        #         output_input.stdout = self, err.args[0]
-
-        #     if _ErrorTempFile.errors_exist():
-        #         # Pass shell, to allow controll of process by
-        #         #       output_input.stderr
-        #         output_input.stderr = self, _ErrorTempFile.read_errors()
-
-        #     if Process.is_sleeping(self.process.pid):
-        #         # Pass shell, to allow comunication with process by
-        #         #       output_input.stdin
-        #         output_input.stdin = self, None
-
-        # if self.process.status == 0:
-        #     output_input.print_success(script.name)
-        # else:
-        #     output_input.print_failure(script.name)
+        if self.exit_code == 0:
+            self.oi_controller.print_success(self.script)
+        else:
+            self.oi_controller.print_failure(self.script)
 
 
 from tests.config import SCRIPTS_FOLDER
@@ -128,6 +114,8 @@ from src.shell import BashShell
 from src.output_input_controller import TerminalOutputInput
 
 script = Script("bash_output_1.sh", SCRIPTS_FOLDER)
+
+script = Script("bash_error_4.sh", SCRIPTS_FOLDER)
 
 shell = BashShell()
 
@@ -137,29 +125,29 @@ shell.spawn_shell()
 
 executor = ScriptExecutor(script, shell, term_oi)
 
-# # executor.execute_script()
+executor.execute_script()
 
 command = executor._create_execution_command()
 
-shell.send_command(command)
+# shell.send_command(command)
 
-pid = executor.pid
+# pid = executor.pid
 
-# # output = shell.read_output_all(script.name)
+# # # output = shell.read_output_all(script.name)
 
-exit_code = executor.exit_code
+# exit_code = executor.exit_code
 
 
 print("command", command, end="\n" * 2)
 
-print("Shell pid", shell.process.pid, end="\n" * 2)
+# print("Shell pid", shell.process.pid, end="\n" * 2)
 
-print("Subshell pid", pid, end="\n" * 2)
+# print("Subshell pid", pid, end="\n" * 2)
 
-print("exit_code", exit_code, end="\n" * 2)
+# print("exit_code", exit_code, end="\n" * 2)
 
-# print("output:")
-# print(output)
+# # print("output:")
+# # print(output)
 
 
 shell.terminate()
