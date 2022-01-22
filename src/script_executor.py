@@ -3,7 +3,7 @@ from src.temporary_errors_buffer import TempErrorFile
 from src.exceptions import NoPidError, NoExitCodeError, NoOutputProduced
 from src.process import Process
 from src.script import Script
-from src.shell import Shell
+from src.shell import SubShell
 
 
 class ScriptExecutor:
@@ -12,13 +12,13 @@ class ScriptExecutor:
     exit_code_tag = "exit_code="
 
     def __init__(
-        self, script: Script, shell: Shell, oi_controller: OutputInputController
+        self, script: Script, shell: SubShell, oi_controller: OutputInputController
     ):
         if not isinstance(script, Script):
             raise TypeError("script has to be Script type")
 
-        if not isinstance(shell, Shell):
-            raise TypeError("shell has to subclass of Shell")
+        if not isinstance(shell, SubShell):
+            raise TypeError("shell has to subclass of SubShell")
 
         if not isinstance(oi_controller, OutputInputController):
             raise TypeError("oi_controller has to be subclass of OutputInputController")
@@ -27,61 +27,14 @@ class ScriptExecutor:
         self.shell = shell
         self.oi_controller = oi_controller
 
-    @classmethod
-    def _create_pid_command(cls):
-        command = "$BASHPID"
-        return f"echo {cls.pid_tag}{command}"
-
-    @classmethod
-    def _is_pid(cls, output: str) -> bool:
-        if "$BASHPID" in output:
-            # Avoid recognizing execution command as pid
-            return False
-        return cls.pid_tag in output
-
-    @classmethod
-    def _extract_pid(cls, output: str) -> str:
-        tag_end_index = output.find(cls.pid_tag) + len(cls.pid_tag)
-        pid_end_index = output.find("\r\n")
-        return output[tag_end_index:pid_end_index]
-
-    @classmethod
-    def _is_exit_code(cls, output: str) -> bool:
-        if "$?" in output:
-            # Avoid recognizing get last exit code command as
-            #   exit code itself
-            return False
-        return cls.exit_code_tag in output
-
-    @classmethod
-    def _extract_exit_code(cls, output: str):
-        tag_end_index = output.find(cls.exit_code_tag) + len(cls.exit_code_tag)
-        exit_code_end_index = output.find("\r\n")
-        return output[tag_end_index:exit_code_end_index]
-
-    def _find_pid(self) -> int:
-        for line in self.shell:
-            print(line)
-            if self._is_pid(line):
-                return self._extract_pid(line)
-        raise NoPidError(f"No pid found for {self.script}")
-
-    def _find_exit_code(self) -> int:
-        for line in self.shell:
-            if self._is_exit_code(line):
-                return self._extract_exit_code(line)
-        raise NoExitCodeError(f"No exit code found for {self.script}")
-
     @property
     def pid(self) -> int:
-        return int(self._find_pid())
+        return self.shell.find_subshell_pid()
 
     @property
     def exit_code(self) -> int:
         """Get exit code of last executed process"""
-        command = "$?"
-        self.shell.send_command(f"echo {self.exit_code_tag}{command}")
-        return int(self._find_exit_code())
+        return self.shell.find_subshell_exit_code()
 
     def _create_execution_command(self) -> str:
         """Create subshell and return its PID. Script
@@ -98,24 +51,24 @@ class ScriptExecutor:
         """
 
         pid_command, interpreter_path, script_path, error_redirection = (
-            self._create_pid_command(),
+            self.shell._create_subshell_pid_command(),
             self.script.find_shebang_path(),
             self.script.path,
             self.errors_buffer.create_error_redirection(),
         )
 
         return (
-            # Subshell char start
+            # SubShell char start
             "("
             # Create pid before execution
             + f"{pid_command} && "
             # Execute under the pid
-            + f"exec {interpreter_path}"
+            + f"exec {interpreter_path} "
             # Script which will be executed
             + f"{script_path}"
             # Redirect errors to temporary file
             + f"{error_redirection}"
-            # Subshell char end
+            # SubShell char end
             + ")"
         )
 
@@ -139,6 +92,7 @@ class ScriptExecutor:
 
         while Process.is_alive(pid):
             self.get_output()
+
             # print(pid, "\n")
             # print(self.shell.process.pid)
 
@@ -183,7 +137,7 @@ shell.spawn_shell()
 
 executor = ScriptExecutor(script, shell, term_oi)
 
-# executor.execute_script()
+# # executor.execute_script()
 
 command = executor._create_execution_command()
 
@@ -191,16 +145,18 @@ shell.send_command(command)
 
 pid = executor.pid
 
-# output = shell.read_output_all(script.name)
+# # output = shell.read_output_all(script.name)
 
-# exit_code = executor.exit_code
+exit_code = executor.exit_code
 
 
 print("command", command, end="\n" * 2)
 
-# print("pid", pid, end="\n" * 2)
+print("Shell pid", shell.process.pid, end="\n" * 2)
 
-# print("exit_code", exit_code, end="\n" * 2)
+print("Subshell pid", pid, end="\n" * 2)
+
+print("exit_code", exit_code, end="\n" * 2)
 
 # print("output:")
 # print(output)

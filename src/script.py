@@ -81,7 +81,7 @@ class Script:
         return ""
 
     @classmethod
-    def _extract_shebang_path(cls, line: str) -> str:
+    def _extract_shebang_path(cls, line) -> str:
         """Slice string to create valid path (without shebang or newline)"""
         return line.replace("#!", "").replace("\n", "")
 
