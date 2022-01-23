@@ -13,6 +13,6 @@ class Process(psutil.Process):
         return False
 
     @classmethod
-    def terminate(cls, pid: int):
+    def kill(cls, pid: int):
         if cls.is_alive(pid):
             cls(pid).terminate()

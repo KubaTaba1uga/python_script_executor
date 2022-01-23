@@ -44,6 +44,14 @@ class Shell(abc.ABC):
         """
         return cls.path
 
+    @classmethod
+    @property
+    def command_line_argument(cls) -> str:
+        """Argument that user passes at script execution to select output input controller,
+        for example: python start.py -o outputinputcontroller
+        """
+        return cls.__name__.lower()
+
     def __init__(self):
         path = Path(self.path)
 
@@ -213,6 +221,8 @@ class BashShell(SubShell):
     subshell_pid = {"tag": "bash_subshell_pid=", "command": "$BASHPID"}
 
     subshell_exit_code = {"tag": "bash_subshell_exit_code=", "command": "$?"}
+
+    command_line_argument = "bash"
 
     def spawn_shell(self, timeout=5):
         """Spawn bash without user preferences to get cleaner output"""

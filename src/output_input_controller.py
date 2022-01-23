@@ -122,12 +122,11 @@ class SimpleTerminalInputDescriptor(BaseDescriptor):
             if str_value.lower() == self.WAITING:
                 sleep(self.WAITING_PERIOD)
             elif str_value.lower() == self.TERMINATION:
-                Process.terminate(subshell_pid)
+                Process.kill(subshell_pid)
             elif str_value.lower == self.CONTINUE:
                 instance.continue_flag = True
             else:
                 shell.send_command(str_value)
-                sleep(5)
 
         instance.__dict__[self.name] = str_value
 
@@ -164,3 +163,5 @@ class TerminalOutputInput(OutputInputController):
     stdin = SimpleTerminalInputDescriptor()
     stdout = TerminalOutputDescriptor()
     stderr = TerminalErrorDescriptor()
+
+    command_line_argument = "terminal"
