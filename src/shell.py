@@ -8,6 +8,7 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
+from typing import Dict
 from pathlib import Path
 import abc
 import sys
@@ -57,6 +58,13 @@ class Shell(abc.ABC):
         while line := self.read_output_line():
             yield line
 
+    def __enter__(self):
+        self.spawn_shell()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tryceback):
+        self.terminate()
+
     def spawn_shell(self, timeout=5):
         """Spawn shell using self.path, and execute script within it."""
         self.process = pexpect.spawn(self.path, encoding="utf-8", timeout=timeout)
@@ -90,9 +98,11 @@ class Shell(abc.ABC):
 
 
 class SubShell(Shell):
+    """All shells should inherit from this class"""
+
     @property
     @abc.abstractclassmethod
-    def subshell(cls) -> dict:
+    def subshell(cls) -> Dict[str, str]:
         """Dictionary which has characters for starting and ending
         a subshell. It is used for creating subshell commands.
         Example:
@@ -102,7 +112,7 @@ class SubShell(Shell):
 
     @property
     @abc.abstractclassmethod
-    def subshell_pid(cls) -> dict:
+    def subshell_pid(cls) -> Dict[str, str]:
         """Dictionary which holds subshell pid tag and
         subshell pid command. It is used for generating
         and recognizing subshell PID. Example:
@@ -112,7 +122,7 @@ class SubShell(Shell):
 
     @property
     @abc.abstractclassmethod
-    def subshell_exit_code(cls) -> dict:
+    def subshell_exit_code(cls) -> Dict[str, str]:
         """Dictionary which holds subshell exit code tag and
         subshell exit code command. It is used for generating
         and recognizing subshell exit code. Example:

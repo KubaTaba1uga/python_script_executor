@@ -18,3 +18,19 @@ def xyz_required(question: str) -> bool:
 
 def is_termination_required() -> bool:
     return xyz_required("Would You like to terminate script execution?")
+
+
+def waiting_termination_continue_input(
+    waiting_str: str, waiting_period: int, termination_str: str, continue_str: str
+) -> str:
+    """Ask user to wait/terminate script/continue to next script or
+    if any of those are not specified takes input"""
+
+    print(
+        f'Type "{termination_str}" to terminate script '
+        + f'"{waiting_str}" to wait {waiting_period}s'
+        + ' "{continue_str}" to skip to next script'
+        + "or anythig else to pass input to script."
+    )
+
+    return input(f"[{termination_str}/{waiting_str}/{continue_str}/...]?  ")

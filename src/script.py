@@ -2,7 +2,6 @@ import os
 import re
 from pathlib import Path
 
-from src.app import SCRIPTS_FOLDER
 from src.exceptions import FileNotFound, NoShebangError
 
 
@@ -52,7 +51,7 @@ class Script:
 
     SHEBANG_REGEX = re.compile(r"#![/\\](?:(?!\.\s+)\S)+(\S)?(\.)?")
 
-    def __init__(self, name: str, folder_path: Path = SCRIPTS_FOLDER):
+    def __init__(self, name: str, folder_path: Path):
         self.name = _ScriptName(name)
         self.path = os.path.join(folder_path, str(name))
 

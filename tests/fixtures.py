@@ -5,7 +5,7 @@ from src.output_input_controller import TerminalOutputInput
 from src.script import _ScriptName
 from src.module import Module
 from src.script import Script
-from src.shell import Shell
+from src.shell import BashShell
 from tests.config import SCRIPTS_FOLDER
 
 
@@ -52,12 +52,14 @@ def bash_input_script():
 
 @pytest.fixture
 def bash_shell():
-    return Shell(BASH_SHELL_PATH)
+    shell = BashShell()
+    shell.spawn_shell()
+    return shell
 
 
 @pytest.fixture
 def module():
-    return Module()
+    return Module(SCRIPTS_FOLDER)
 
 
 @pytest.fixture
@@ -90,12 +92,6 @@ def non_existing_path():
 def non_executable_path():
     path = "/bin"
     return Path(path)
-
-
-@pytest.fixture
-def shell():
-    shell_path = Path("/bin/bash")
-    return Shell(shell_path)
 
 
 @pytest.fixture

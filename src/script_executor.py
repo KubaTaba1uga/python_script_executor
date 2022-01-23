@@ -1,18 +1,18 @@
 from src.output_input_controller import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
-from src.exceptions import NoPidError, NoExitCodeError, NoOutputProduced
+from src.exceptions import NoOutputProduced
 from src.process import Process
 from src.script import Script
 from src.shell import SubShell
 
 
 class ScriptExecutor:
-    errors_buffer = TempErrorFile()
-    pid_tag = "pid="
-    exit_code_tag = "exit_code="
-
     def __init__(
-        self, script: Script, shell: SubShell, oi_controller: OutputInputController
+        self,
+        script: Script,
+        shell: SubShell,
+        oi_controller: OutputInputController,
+        errors_buffer: TempErrorFile,
     ):
         if not isinstance(script, Script):
             raise TypeError("script has to be Script type")
@@ -23,9 +23,13 @@ class ScriptExecutor:
         if not isinstance(oi_controller, OutputInputController):
             raise TypeError("oi_controller has to be subclass of OutputInputController")
 
+        if not shell.process:
+            raise
+
         self.script = script
         self.shell = shell
         self.oi_controller = oi_controller
+        self.errors_buffer = errors_buffer
 
     @property
     def pid(self) -> int:
@@ -59,7 +63,7 @@ class ScriptExecutor:
 
         return (
             # SubShell char start
-            "("
+            self.shell.subshell["start"]
             # Create pid before execution
             + f"{pid_command} && "
             # Execute under the pid
@@ -69,28 +73,29 @@ class ScriptExecutor:
             # Redirect errors to temporary file
             + f"{error_redirection}"
             # SubShell char end
-            + ")"
+            + self.shell.subshell["end"]
         )
 
     def get_output(self, subshell_pid):
         try:
-            output = self.shell, self.shell.read_output_all(self.script)
+            output = self.shell.read_output_all(self.script)
         except NoOutputProduced as err:
-            output = self.shell, err.args[0]
-        self.oi_controller.stdout = output
+            output = err.args[0]
+        self.oi_controller.stdout = self.shell, output, subshell_pid
 
     def get_errors(self, subshell_pid):
         if self.errors_buffer.exist():
-            self.oi_controller.stderr = self.shell, self.errors_buffer.read()
+            self.oi_controller.stderr = (
+                self.shell,
+                self.errors_buffer.read(),
+                subshell_pid,
+            )
 
     def get_input(self, subshell_pid):
-        if Process.is_sleeping(subshell_pid):
-            self.oi_controller.stdin = self.shell, None
+        self.oi_controller.stdin = self.shell, None, subshell_pid
 
     def execute_script(self):
         """Execute script as another process"""
-        if not self.shell.process:
-            self.shell.spawn_shell()
 
         command = self._create_execution_command()
 
@@ -98,56 +103,12 @@ class ScriptExecutor:
 
         pid = self.pid
 
-        while Process.is_alive(pid):
+        while Process.is_alive(pid) and not self.oi_controller.continue_flag:
             self.get_output(pid)
             self.get_errors(pid)
             self.get_input(pid)
 
-        if self.exit_code == 0:
-            self.oi_controller.print_success(self.script)
-        else:
-            self.oi_controller.print_failure(self.script)
+        if not self.oi_controller.continue_flag:
+            self.oi_controller.show_status(self.script, self.exit_code)
 
-
-from tests.config import SCRIPTS_FOLDER
-from src.shell import BashShell
-from src.output_input_controller import TerminalOutputInput
-
-script = Script("bash_output_1.sh", SCRIPTS_FOLDER)
-
-script = Script("bash_error_4.sh", SCRIPTS_FOLDER)
-
-shell = BashShell()
-
-term_oi = TerminalOutputInput()
-
-shell.spawn_shell()
-
-executor = ScriptExecutor(script, shell, term_oi)
-
-executor.execute_script()
-
-command = executor._create_execution_command()
-
-# shell.send_command(command)
-
-# pid = executor.pid
-
-# # # output = shell.read_output_all(script.name)
-
-# exit_code = executor.exit_code
-
-
-print("command", command, end="\n" * 2)
-
-# print("Shell pid", shell.process.pid, end="\n" * 2)
-
-# print("Subshell pid", pid, end="\n" * 2)
-
-# print("exit_code", exit_code, end="\n" * 2)
-
-# # print("output:")
-# # print(output)
-
-
-shell.terminate()
+        self.errors_buffer.delete()

@@ -1,11 +1,12 @@
 from pathlib import Path
 import sys
+import os
 
 
 class TempErrorFile:
     FILE_NAME = "errors_temp.log"
 
-    def __init__(self, directory: Path = Path(sys.argv[0]).parent):
+    def __init__(self, directory: Path):
         self.directory = directory
         self.path = directory.joinpath(self.FILE_NAME)
 
@@ -31,3 +32,6 @@ class TempErrorFile:
 
     def create_error_redirection(self):
         return f" 2> {self.path}"
+
+    def delete(self):
+        os.remove(self.path)

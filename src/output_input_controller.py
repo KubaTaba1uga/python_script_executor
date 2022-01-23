@@ -1,4 +1,8 @@
+from time import sleep
 import abc
+
+from src.process import Process
+from src.utils import waiting_termination_continue_input
 
 
 class BaseDescriptor(abc.ABC):
@@ -6,14 +10,14 @@ class BaseDescriptor(abc.ABC):
         self.name = name
 
     @abc.abstractmethod
-    def __set__(self, instance, value_tuple):
-        """Receive shell and value to allow
-        OutputInputController children
-        for controlling shell process"""
+    def __set__(self, instance, values):
+        """Receive shell, value and subshell PID
+        to allow OutputInputController children
+        for controlling processes behaviour"""
 
-        shell, value = value_tuple
+        shell, str_value, subshell_pid = values
 
-        instance.__dict__[self.name] = value
+        instance.__dict__[self.name] = str_value
 
     @abc.abstractmethod
     def __get__(self, instance, cls):
@@ -36,87 +40,127 @@ class OutputInputController(abc.ABC):
     Use descriptors to override abstract class properties.
     """
 
+    def __init__(self):
+        # Flag is responsible for skipping script execution.
+        # In case a user would like to execute next script
+        # without killing previous one. It is useful feature
+        # for ssh loging when user would like to not terminate
+        # connection and execute scripts on remote machine.
+        self.continue_flag = False
+
     @classmethod
-    def print_success(cls, script_name: str):
+    def show_success(cls, script_name: str):
         print("\n" + f"Execution of {script_name} succeed" + "\n")
 
     @classmethod
-    def print_failure(cls, script_name: str):
+    def show_failure(cls, script_name: str):
         print("\n" + f"Execution of {script_name} failed" + "\n")
+
+    @classmethod
+    def show_status(cls, script_name: str, exit_code: int):
+        if exit_code == 0:
+            cls.show_success(script_name)
+        else:
+            cls.show_failure(script_name)
+
+    @classmethod
+    @property
+    def command_line_argument(cls) -> str:
+        """Argument that user passes at script execution to select output input controller,
+        for example: python start.py -o outputinputcontroller
+        """
+        return cls.__name__.lower()
+
+    def continue_flag(self) -> bool:
+        return self.continue_flag
 
     @property
     @abc.abstractclassmethod
-    def stdin(cls):
+    def stdin(cls) -> BaseDescriptor:
         return cls.stdin
 
     @property
     @abc.abstractclassmethod
-    def stdout(cls):
+    def stdout(cls) -> BaseDescriptor:
         return cls.stdout
 
     @property
     @abc.abstractclassmethod
-    def stderr(cls):
+    def stderr(cls) -> BaseDescriptor:
         return cls.stderr
-
-    @property
-    @abc.abstractclassmethod
-    def command_line_flag(cls):
-        """Flag that user passes at script execution, example: python start.py -s
-        it is used for app to know which OutputInputController should be used.
-        """
-        return "-s"
 
 
 class TerminalOutputDescriptor(BaseDescriptor):
-    def __set__(self, instance, value_tuple):
-        _shell, value = value_tuple
+    def __set__(self, instance, values: tuple):
+        _shell, str_value, subshell_pid = values
 
-        print(value)
+        print(str_value)
 
-        instance.__dict__[self.name] = value
+        instance.__dict__[self.name] = str_value
 
     def __get__(self, instance, cls):
         return instance.__dict__[self.name]
 
 
-class TerminalInputDescriptor(BaseDescriptor):
-    def __set__(self, instance, value_tuple):
-        """When revoked ask user for input,
-        instead of using value_tuple[1] parameter"""
+class SimpleTerminalInputDescriptor(BaseDescriptor):
+    WAITING = "w"
+    WAITING_PERIOD = 30
+    TERMINATION = "t"
+    CONTINUE = "c"
 
-        value = input("\n" + "Input: ")
+    def __set__(self, instance, values: tuple):
+        """Ask user for input only when process
+        is sleeping. This is not ideal solution,
+        however i couldn't find any better"""
+        shell, str_value, subshell_pid = values
 
-        instance.__dict__[self.name] = value
+        if Process.is_sleeping(subshell_pid):
+            str_value = waiting_termination_continue_input(
+                self.WAITING, self.WAITING_PERIOD, self.TERMINATION, self.CONTINUE
+            )
+
+            if str_value.lower() == self.WAITING:
+                sleep(self.WAITING_PERIOD)
+            elif str_value.lower() == self.TERMINATION:
+                Process.terminate(subshell_pid)
+            elif str_value.lower == self.CONTINUE:
+                instance.continue_flag = True
+            else:
+                shell.send_command(str_value)
+                sleep(5)
+
+        instance.__dict__[self.name] = str_value
 
     def __get__(self, instance, cls):
         return instance.__dict__[self.name]
 
 
 class TerminalErrorDescriptor(BaseDescriptor):
-    def __set__(self, instance, value_tuple):
-        _shell, value = value_tuple
+    def __set__(self, instance, values: tuple):
+        _shell, str_value, subshell_pid = values
+
         double_newline = "\n" * 2
+
         tab = " " * 4
+
         print(
             double_newline
             + "ERROR!!!"
             + double_newline
             + tab
-            + f"{value}"
+            + f"{str_value}"
             + double_newline
             + "ERROR!!!",
             end=double_newline,
         )
 
-        instance.__dict__[self.name] = value
+        instance.__dict__[self.name] = str_value
 
     def __get__(self, instance, cls):
         return instance.__dict__[self.name]
 
 
 class TerminalOutputInput(OutputInputController):
-    stdin = TerminalInputDescriptor()
+    stdin = SimpleTerminalInputDescriptor()
     stdout = TerminalOutputDescriptor()
     stderr = TerminalErrorDescriptor()
-    command_line_flag = "-t"
