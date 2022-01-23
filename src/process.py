@@ -1,20 +1,18 @@
-from psutil import Process as PsutilProcess
-from psutil import NoSuchProcess
+import psutil
 
 
-class Process(PsutilProcess):
+class Process(psutil.Process):
     @classmethod
-    def is_alive(cls, pid: int):
-        try:
-            cls(pid)
-        except NoSuchProcess:
-            is_alive = False
-        else:
-            is_alive = True
-        return is_alive
+    def is_alive(cls, pid: int) -> bool:
+        return psutil.pid_exists(pid)
 
     @classmethod
-    def is_sleeping(cls, pid: int):
+    def is_sleeping(cls, pid: int) -> bool:
         if cls.is_alive(pid):
             return cls(pid).status() == "sleeping"
         return False
+
+    @classmethod
+    def terminate(cls, pid: int):
+        if cls.is_alive(pid):
+            cls(pid).terminate()
