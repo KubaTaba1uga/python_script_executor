@@ -16,7 +16,7 @@ class Module:
         return (script[1] for script in self._list_sorted_scripts())
 
     @classmethod
-    def _get_first_element(cls, collection) -> Any:
+    def _get_first_element(cls, collection: Any) -> Any:
         """Get first element of collection"""
         return collection[0]
 

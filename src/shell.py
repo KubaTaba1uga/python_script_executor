@@ -8,7 +8,7 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
-from typing import Dict
+from typing import Dict, Generator
 from pathlib import Path
 import abc
 import sys
@@ -34,9 +34,30 @@ class Shell(abc.ABC):
     """Shell module is responsible for spawning the  environment
     in which scripts will be executed and for communicating with them."""
 
+    def __init__(self):
+        path = Path(self.path)
+
+        if not path.exists():
+            raise FileNotFound(f"{path} not found")
+        if not pexpect.utils.is_executable_file(path):
+            raise FileNotExecutable(f"{path} is not executable")
+
+        self.process = None
+
+    def __iter__(self) -> Generator:
+        while line := self.read_output_line():
+            yield line
+
+    def __enter__(self):
+        self.spawn_shell()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tryceback):
+        self.terminate()
+
     @property
     @abc.abstractclassmethod
-    def path(cls):
+    def path(cls) -> str:
         """Path to shell by which all scripts will be executed, for example:
         /bin/bash
         /bin/env zsh
@@ -52,28 +73,7 @@ class Shell(abc.ABC):
         """
         return cls.__name__.lower()
 
-    def __init__(self):
-        path = Path(self.path)
-
-        if not path.exists():
-            raise FileNotFound(f"{path} not found")
-        if not pexpect.utils.is_executable_file(path):
-            raise FileNotExecutable(f"{path} is not executable")
-
-        self.process = None
-
-    def __iter__(self):
-        while line := self.read_output_line():
-            yield line
-
-    def __enter__(self):
-        self.spawn_shell()
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_tryceback):
-        self.terminate()
-
-    def spawn_shell(self, timeout=5):
+    def spawn_shell(self, timeout: int = 5):
         """Spawn shell using self.path, and execute script within it."""
         self.process = pexpect.spawn(self.path, encoding="utf-8", timeout=timeout)
 
@@ -85,11 +85,11 @@ class Shell(abc.ABC):
         """Terminate shell, when no scripts are left for execution"""
         self.process.terminate()
 
-    def read_output_all(self, script_name: str) -> str:
+    def read_output_all(self, script_name: str, timeout: int = 5) -> str:
         """Read all output lines from shell. If output is not
         recived before timeout return what has left"""
         try:
-            self.process.expect(pexpect.EOF)
+            self.process.expect(pexpect.EOF, timeout=timeout)
         except pexpect.TIMEOUT as err:
             if not self.process.before:
                 raise NoOutputProduced(
@@ -224,8 +224,8 @@ class BashShell(SubShell):
 
     command_line_argument = "bash"
 
-    def spawn_shell(self, timeout=5):
+    def spawn_shell(self, timeout: int = 5):
         """Spawn bash without user preferences to get cleaner output"""
         self.process = pexpect.spawn(
-            self.path, args=["--norc"], encoding="utf-8", timeout=timeout
+            self.path, args=["--noprofile", "--norc"], encoding="utf-8", timeout=timeout
         )

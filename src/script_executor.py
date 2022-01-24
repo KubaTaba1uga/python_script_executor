@@ -76,14 +76,14 @@ class ScriptExecutor:
             + self.shell.subshell["end"]
         )
 
-    def get_output(self, subshell_pid):
+    def get_output(self, subshell_pid: int):
         try:
-            output = self.shell.read_output_all(self.script)
+            output = self.shell.read_output_all(str(self.script))
         except NoOutputProduced as err:
             output = err.args[0]
         self.oi_controller.stdout = self.shell, output, subshell_pid
 
-    def get_errors(self, subshell_pid):
+    def get_errors(self, subshell_pid: int):
         if self.errors_buffer.exist():
             self.oi_controller.stderr = (
                 self.shell,
@@ -91,7 +91,7 @@ class ScriptExecutor:
                 subshell_pid,
             )
 
-    def get_input(self, subshell_pid):
+    def get_input(self, subshell_pid: int):
         self.oi_controller.stdin = self.shell, None, subshell_pid
 
     def execute_script(self):
@@ -103,12 +103,11 @@ class ScriptExecutor:
 
         pid = self.pid
 
-        while Process.is_alive(pid) and not self.oi_controller.continue_flag:
-            self.get_output(pid)
-            self.get_errors(pid)
-            self.get_input(pid)
+        with self.errors_buffer:
+            while Process.is_alive(pid) and not self.oi_controller.continue_flag:
+                self.get_output(pid)
+                self.get_errors(pid)
+                self.get_input(pid)
 
-        if not self.oi_controller.continue_flag:
-            self.oi_controller.show_status(self.script, self.exit_code)
-
-        self.errors_buffer.delete()
+            if not self.oi_controller.continue_flag:
+                self.oi_controller.show_status(self.script, self.exit_code)

@@ -16,17 +16,17 @@ class _ScriptName:
         return self.name
 
     @classmethod
-    def is_number(cls, number: str):
+    def is_number(cls, number: str) -> bool:
         try:
             int(number)
         except ValueError:
             return False
         return True
 
-    def _find_last_underscore(self):
+    def _find_last_underscore(self) -> int:
         return len(self.name) - self.name[::-1].find("_")
 
-    def _find_last_dot(self):
+    def _find_last_dot(self) -> int:
         return len(self.name) - self.name[::-1].find(".") - 1
 
     def find_script_number(self) -> str:
@@ -40,12 +40,12 @@ class _ScriptName:
 
         return ""
 
-    def is_script_numbered(self):
+    def is_script_numbered(self) -> bool:
         return bool(self.find_script_number())
 
 
 class Script:
-    """Script which know how to read and execute itself"""
+    """Script which know how to read  itself"""
 
     SHEBANG = "#!"
 
@@ -53,9 +53,9 @@ class Script:
 
     def __init__(self, name: str, folder_path: Path):
         self.name = _ScriptName(name)
-        self.path = os.path.join(folder_path, str(name))
+        self.path = folder_path.joinpath(name)
 
-        if not Path(self.path).exists():
+        if not self.path.exists():
             raise FileNotFound(f"{self.path} not found")
 
     def __iter__(self):
@@ -80,7 +80,7 @@ class Script:
         return ""
 
     @classmethod
-    def _extract_shebang_path(cls, line) -> str:
+    def _extract_shebang_path(cls, line: str) -> str:
         """Slice string to create valid path (without shebang or newline)"""
         return line.replace("#!", "").replace("\n", "")
 
@@ -95,7 +95,6 @@ class Script:
 
         Shebang example:
                 #!/bin/bash
-
 
         If no shebang is found raise NoShebangError.
         """

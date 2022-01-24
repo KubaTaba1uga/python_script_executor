@@ -10,7 +10,13 @@ class TempErrorFile:
         self.directory = directory
         self.path = directory.joinpath(self.FILE_NAME)
 
-    def read(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tryceback):
+        self.delete()
+
+    def read(self) -> str:
         """Read errors from file and clean buffer"""
         with open(self.path, "r+") as temp_errors:
             error_content = temp_errors.read()
@@ -20,7 +26,8 @@ class TempErrorFile:
             temp_errors.truncate()
         return error_content
 
-    def exist(self):
+    def exist(self) -> bool:
+        """Check is any errors within a buffer"""
         if not self.path.exists():
             return False
 
@@ -30,8 +37,9 @@ class TempErrorFile:
             #   for bool function
             return bool(temp_errors.read().strip())
 
-    def create_error_redirection(self):
+    def create_error_redirection(self) -> str:
         return f" 2> {self.path}"
 
     def delete(self):
-        os.remove(self.path)
+        if self.path.exists():
+            os.remove(self.path)

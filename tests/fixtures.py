@@ -1,3 +1,4 @@
+from subprocess import Popen
 from pathlib import Path
 import pytest
 
@@ -6,7 +7,7 @@ from src.script import _ScriptName
 from src.module import Module
 from src.script import Script
 from src.shell import BashShell
-from tests.config import SCRIPTS_FOLDER
+from tests.config import GOOD_SCRIPTS_DIR, BAD_SCRIPTS_DIR
 
 
 SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
@@ -14,52 +15,55 @@ SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
 SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
 
 
-GOOD_SCRIPT = {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"}
+GOOD_SCRIPTS = {
+    "shebang": {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"},
+    "output": {"name": "bash_output_1.sh"},
+    "input": {"name": "bash_input_2.sh"},
+    "error": {"name": "bash_error_4.sh"},
+    "dir_path": GOOD_SCRIPTS_DIR,
+}
 
-BAD_SCRIPT = {"name": "bash_no_shebang.sh", "shebang_path": ""}
-
-
-OUTPUT_SCRIPT = {"name": "bash_output_1.sh"}
-
-INPUT_SCRIPT = {"name": "bash_input_2.sh"}
-
-SHELL_SCRIPT = {"name": "bash_shell.sh"}
-
-ERROR_SCRIPT = {"name": "bash_error_4.sh"}
+BAD_SCRIPTS = {
+    "no_shebang": {"name": "bash_no_shebang.sh", "shebang_path": ""},
+    "dir_path": BAD_SCRIPTS_DIR,
+}
 
 BASH_SHELL_PATH = Path("/bin/bash")
 
 
 @pytest.fixture
 def bash_error_script():
-    return Script(ERROR_SCRIPT["name"], SCRIPTS_FOLDER)
-
-
-@pytest.fixture
-def bash_shell_script():
-    return Script(SHELL_SCRIPT["name"], SCRIPTS_FOLDER)
+    return Script(GOOD_SCRIPTS["error"]["name"], GOOD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture
 def bash_output_script():
-    return Script(OUTPUT_SCRIPT["name"], SCRIPTS_FOLDER)
+    return Script(GOOD_SCRIPTS["output"]["name"], GOOD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture
 def bash_input_script():
-    return Script(INPUT_SCRIPT["name"], SCRIPTS_FOLDER)
+    return Script(GOOD_SCRIPTS["input"]["name"], GOOD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
+def script_shebang():
+    return Script(GOOD_SCRIPTS["shebang"]["name"], GOOD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture
 def bash_shell():
-    shell = BashShell()
-    shell.spawn_shell()
-    return shell
+    return BashShell()
+
+
+@pytest.fixture
+def popen_process():
+    return Popen(args=["/usr/bin/sleep", "10"])
 
 
 @pytest.fixture
 def module():
-    return Module(SCRIPTS_FOLDER)
+    return Module(GOOD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture
@@ -73,13 +77,8 @@ def script_name_without_number():
 
 
 @pytest.fixture
-def script():
-    return Script(GOOD_SCRIPT["name"], SCRIPTS_FOLDER)
-
-
-@pytest.fixture
 def bad_script():
-    return Script(BAD_SCRIPT["name"], SCRIPTS_FOLDER)
+    return Script(BAD_SCRIPTS["no_shebang"]["name"], BAD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture

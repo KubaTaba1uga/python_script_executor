@@ -35,4 +35,8 @@ def waiting_termination_continue_input(
         end="\n" * 2,
     )
 
-    return input(f"[{termination_str}/{waiting_str}/{continue_str}/...]?  ")
+    result = input(f"[{termination_str}/{waiting_str}/{continue_str}/...]?  ")
+
+    print()
+
+    return result

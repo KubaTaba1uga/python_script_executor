@@ -6,11 +6,11 @@ from src.utils import waiting_termination_continue_input
 
 
 class BaseDescriptor(abc.ABC):
-    def __set_name__(self, cls, name):
+    def __set_name__(self, cls, name: str):
         self.name = name
 
     @abc.abstractmethod
-    def __set__(self, instance, values):
+    def __set__(self, instance, values: tuple):
         """Receive shell, value and subshell PID
         to allow OutputInputController children
         for controlling processes behaviour"""
@@ -71,9 +71,6 @@ class OutputInputController(abc.ABC):
         """
         return cls.__name__.lower()
 
-    def continue_flag(self) -> bool:
-        return self.continue_flag
-
     @property
     @abc.abstractclassmethod
     def stdin(cls) -> BaseDescriptor:
@@ -102,7 +99,7 @@ class TerminalOutputDescriptor(BaseDescriptor):
         return instance.__dict__[self.name]
 
 
-class SimpleTerminalInputDescriptor(BaseDescriptor):
+class TerminalInputDescriptor(BaseDescriptor):
     WAITING = "w"
     WAITING_PERIOD = 30
     TERMINATION = "t"
@@ -123,7 +120,7 @@ class SimpleTerminalInputDescriptor(BaseDescriptor):
                 sleep(self.WAITING_PERIOD)
             elif str_value.lower() == self.TERMINATION:
                 Process.kill(subshell_pid)
-            elif str_value.lower == self.CONTINUE:
+            elif str_value.lower() == self.CONTINUE:
                 instance.continue_flag = True
             else:
                 shell.send_command(str_value)
@@ -160,7 +157,7 @@ class TerminalErrorDescriptor(BaseDescriptor):
 
 
 class TerminalOutputInput(OutputInputController):
-    stdin = SimpleTerminalInputDescriptor()
+    stdin = TerminalInputDescriptor()
     stdout = TerminalOutputDescriptor()
     stderr = TerminalErrorDescriptor()
 

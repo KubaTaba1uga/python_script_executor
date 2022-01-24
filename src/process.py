@@ -8,6 +8,9 @@ class Process(psutil.Process):
 
     @classmethod
     def is_sleeping(cls, pid: int) -> bool:
+        if pid == -1:
+            # For testing purposes
+            return True
         if cls.is_alive(pid):
             return cls(pid).status() == "sleeping"
         return False
