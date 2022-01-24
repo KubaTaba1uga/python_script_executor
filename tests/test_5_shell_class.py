@@ -111,3 +111,48 @@ def test__iter__():
 def test_command_line_argument():
     for cls in SubShell.__subclasses__():
         assert isinstance(cls.command_line_argument, str)
+
+
+def test_find_subshell_pid():
+    for cls in SubShell.__subclasses__():
+        pid = 123
+        command = f"echo {cls.subshell_pid['tag']}{pid}"
+        with cls() as shell:
+            shell.send_command(command)
+            assert shell.find_subshell_pid() == pid
+
+
+def test_bash_find_subshell_exit_code():
+    for cls in SubShell.__subclasses__():
+        exit_code = 0
+        command = f"echo {cls.subshell_exit_code['tag']}{exit_code}"
+        with cls() as shell:
+            shell.send_command(command)
+            assert shell.find_subshell_exit_code() == exit_code
+
+
+def test_bash_get_subshell_exit_code():
+    for cls in SubShell.__subclasses__():
+        with cls() as shell:
+            shell.send_command("ls")
+            exit_code = shell.get_subshell_exit_code()
+            assert exit_code == 0
+
+
+def test_create_subshell_pid_command():
+    for cls in SubShell.__subclasses__():
+        with cls() as shell:
+            command = shell.create_subshell_pid_command()
+            shell.send_command(command)
+            pid = shell.find_subshell_pid()
+            assert isinstance(pid, int)
+
+
+def test_create_subshell_command():
+    for cls in SubShell.__subclasses__():
+        with cls() as shell:
+            pid_command = shell.create_subshell_pid_command()
+            command = shell.create_subshell_command(pid_command)
+            shell.send_command(command)
+            subshell_pid = shell.find_subshell_pid()
+            assert subshell_pid != shell.process.pid
