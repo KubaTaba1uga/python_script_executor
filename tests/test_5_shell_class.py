@@ -11,9 +11,6 @@ from tests.fixtures import (
     non_executable_path,
     non_existing_path,
     bash_shell,
-    bash_output_script,
-    terminal_oi,
-    bash_error_script,
 )
 
 

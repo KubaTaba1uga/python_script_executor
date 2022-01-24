@@ -3,10 +3,12 @@ from pathlib import Path
 import pytest
 
 from src.output_input_controller import TerminalOutputInput
+from src.temporary_errors_buffer import TempErrorFile
 from src.script import _ScriptName
+from src.shell import BashShell
 from src.module import Module
 from src.script import Script
-from src.shell import BashShell
+
 from tests.config import GOOD_SCRIPTS_DIR, BAD_SCRIPTS_DIR
 
 
@@ -96,3 +98,9 @@ def non_executable_path():
 @pytest.fixture
 def terminal_oi():
     return TerminalOutputInput()
+
+
+@pytest.fixture
+def temp_err_buffer():
+    path = Path("/tmp")
+    return TempErrorFile(path)

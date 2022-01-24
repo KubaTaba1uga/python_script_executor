@@ -1,16 +1,20 @@
+from typing import TYPE_CHECKING
+from typing import Tuple
 from time import sleep
 import abc
 
 from src.process import Process
 from src.utils import waiting_termination_continue_input
 
+if TYPE_CHECKING:
+    from src.shell import SubShell
+
 
 class BaseDescriptor(abc.ABC):
     def __set_name__(self, cls, name: str):
         self.name = name
 
-    @abc.abstractmethod
-    def __set__(self, instance, values: tuple):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
         """Receive shell, value and subshell PID
         to allow OutputInputController children
         for controlling processes behaviour"""
@@ -19,7 +23,6 @@ class BaseDescriptor(abc.ABC):
 
         instance.__dict__[self.name] = str_value
 
-    @abc.abstractmethod
     def __get__(self, instance, cls):
         return instance.__dict__[self.name]
 
@@ -63,40 +66,40 @@ class OutputInputController(abc.ABC):
         else:
             cls.show_failure(script_name)
 
-    @classmethod
     @property
+    @classmethod
     def command_line_argument(cls) -> str:
         """Argument that user passes at script execution to select output input controller,
         for example: python start.py -o outputinputcontroller
         """
         return cls.__name__.lower()
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def stdin(cls) -> BaseDescriptor:
-        return cls.stdin
+        return BaseDescriptor()
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def stdout(cls) -> BaseDescriptor:
-        return cls.stdout
+        return BaseDescriptor()
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def stderr(cls) -> BaseDescriptor:
-        return cls.stderr
+        return BaseDescriptor()
 
 
 class TerminalOutputDescriptor(BaseDescriptor):
-    def __set__(self, instance, values: tuple):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
         _shell, str_value, subshell_pid = values
 
         print(str_value)
 
         instance.__dict__[self.name] = str_value
-
-    def __get__(self, instance, cls):
-        return instance.__dict__[self.name]
 
 
 class TerminalInputDescriptor(BaseDescriptor):
@@ -105,7 +108,7 @@ class TerminalInputDescriptor(BaseDescriptor):
     TERMINATION = "t"
     CONTINUE = "c"
 
-    def __set__(self, instance, values: tuple):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
         """Ask user for input only when process
         is sleeping. This is not ideal solution,
         however i couldn't find any better"""
@@ -127,12 +130,9 @@ class TerminalInputDescriptor(BaseDescriptor):
 
         instance.__dict__[self.name] = str_value
 
-    def __get__(self, instance, cls):
-        return instance.__dict__[self.name]
-
 
 class TerminalErrorDescriptor(BaseDescriptor):
-    def __set__(self, instance, values: tuple):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
         _shell, str_value, subshell_pid = values
 
         double_newline = "\n" * 2
@@ -151,9 +151,6 @@ class TerminalErrorDescriptor(BaseDescriptor):
         )
 
         instance.__dict__[self.name] = str_value
-
-    def __get__(self, instance, cls):
-        return instance.__dict__[self.name]
 
 
 class TerminalOutputInput(OutputInputController):

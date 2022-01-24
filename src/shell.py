@@ -1,6 +1,6 @@
 """
 Environment, in which scripts will be executed in,
-        it is precized by script first line. Example:
+         is precized by script first line (shebang). Example:
                 #!/bin/bash - spawn shell /bin/bash
                                         before script execution
 
@@ -8,7 +8,7 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
-from typing import Dict, Generator
+from typing import Dict, Generator, TypeVar, Type
 from pathlib import Path
 import abc
 import sys
@@ -56,14 +56,15 @@ class Shell(abc.ABC):
         self.terminate()
 
     @property
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def path(cls) -> str:
         """Path to shell by which all scripts will be executed, for example:
         /bin/bash
         /bin/env zsh
         /bin/sh
         """
-        return cls.path
+        return "/bin/bash"
 
     @classmethod
     @property
@@ -108,42 +109,41 @@ class Shell(abc.ABC):
 class SubShell(Shell):
     """All shells should inherit from this class"""
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def subshell(cls) -> Dict[str, str]:
         """Dictionary which has characters for starting and ending
         a subshell. It is used for creating subshell commands.
-        Example:
-                 {"start": "(", "end": ")"}
         """
-        return cls.subshell
+        return {"start": "(", "end": ")"}
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def subshell_pid(cls) -> Dict[str, str]:
         """Dictionary which holds subshell pid tag and
         subshell pid command. It is used for generating
-        and recognizing subshell PID. Example:
-                 {"tag": "bash_subshell_pid=", "command": "$BASHPID"}
+        and recognizing subshell PID.
         """
-        return cls.subshell_pid
+        return {"tag": "bash_subshell_pid=", "command": "$BASHPID"}
 
+    @classmethod
     @property
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def subshell_exit_code(cls) -> Dict[str, str]:
         """Dictionary which holds subshell exit code tag and
         subshell exit code command. It is used for generating
-        and recognizing subshell exit code. Example:
-                {"tag": "bash_subshell_exit_code=", "command": "$?"}
+        and recognizing subshell exit code.
         """
-        return cls.subshell_exit_code
+        return {"tag": "bash_subshell_exit_code=", "command": "$?"}
 
     @classmethod
     def create_subshell_command(cls, command: str) -> str:
         """Change command provided as argument to
         be executed in subshell when revoked.
         Like in bash is done by adding paranthesesis around"""
-        return f"{cls.subshell['start']}{command}{cls.subshell['end']}"
+        return f"{cls.subshell['start']}{command}{cls.subshell['end']}"  # type:ignore
 
     @classmethod
     def create_subshell_pid_command(cls) -> str:
@@ -151,21 +151,21 @@ class SubShell(Shell):
         of subshell in which it is being revoked.
         Like in sh $PPID. Adding tag before PID
         is important for later PID recognization"""
-        pid_tag = cls.subshell_pid["tag"]
-        pid_command = cls.subshell_pid["command"]
+        pid_tag = cls.subshell_pid["tag"]  # type:ignore
+        pid_command = cls.subshell_pid["command"]  # type:ignore
         return f"echo {pid_tag}{pid_command}"
 
     @classmethod
     def _is_subshell_pid(cls, output: str) -> bool:
         """Decide is subshell PID within the output"""
-        pid_tag = cls.subshell_pid["tag"]
-        pid_command = cls.subshell_pid["command"]
+        pid_tag = cls.subshell_pid["tag"]  # type:ignore
+        pid_command = cls.subshell_pid["command"]  # type:ignore
         return pid_tag in output and pid_command not in output
 
     @classmethod
     def _extract_subshell_pid(cls, output: str) -> int:
         """Extract subshell PID from output"""
-        pid_tag = cls.subshell_pid["tag"]
+        pid_tag = cls.subshell_pid["tag"]  # type:ignore
         pid_tag_end_index = output.find(pid_tag) + len(pid_tag)
         pid_end_index = output.find("\r\n")
         return int(output[pid_tag_end_index:pid_end_index])
@@ -175,20 +175,20 @@ class SubShell(Shell):
         """Create command which will echo the exit code
         of last subshell that is no longer running. Like in
         bash $?"""
-        exit_code_tag = cls.subshell_exit_code["tag"]
-        exit_code_command = cls.subshell_exit_code["command"]
+        exit_code_tag = cls.subshell_exit_code["tag"]  # type:ignore
+        exit_code_command = cls.subshell_exit_code["command"]  # type:ignore
         return f"echo {exit_code_tag}{exit_code_command}"
 
     @classmethod
     def _is_subshell_exit_code(cls, output: str) -> bool:
         """Decide is subshell exit code within output"""
-        exit_code_tag = cls.subshell_exit_code["tag"]
-        exit_code_command = cls.subshell_exit_code["command"]
+        exit_code_tag = cls.subshell_exit_code["tag"]  # type:ignore
+        exit_code_command = cls.subshell_exit_code["command"]  # type:ignore
         return exit_code_tag in output and exit_code_command not in output
 
     @classmethod
     def _extract_subshell_exit_code(cls, output: str) -> int:
-        exit_code_tag = cls.subshell_exit_code["tag"]
+        exit_code_tag = cls.subshell_exit_code["tag"]  # type:ignore
         exit_code_tag_end_index = output.find(exit_code_tag) + len(exit_code_tag)
         exit_code_end_index = output.find("\r\n")
         return int(output[exit_code_tag_end_index:exit_code_end_index])

@@ -6,7 +6,7 @@ import os
 class TempErrorFile:
     FILE_NAME = "errors_temp.log"
 
-    def __init__(self, directory: Path):
+    def __init__(self, directory):
         self.directory = directory
         self.path = directory.joinpath(self.FILE_NAME)
 
@@ -16,7 +16,7 @@ class TempErrorFile:
     def __exit__(self, exc_type, exc_value, exc_tryceback):
         self.delete()
 
-    def read(self) -> str:
+    def read(self):
         """Read errors from file and clean buffer"""
         with open(self.path, "r+") as temp_errors:
             error_content = temp_errors.read()

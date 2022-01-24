@@ -156,4 +156,9 @@ if __name__ == "__main__":
     else:
         errors_directory = default_error_buffer_directory
 
-    main(shell, scripts_directory, output_input_controller, errors_directory)
+    main(
+        shell=shell,
+        script_folder_path=scripts_directory,
+        oi_controller=output_input_controller,
+        errors_buffer_path=errors_directory,
+    )

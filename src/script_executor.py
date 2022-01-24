@@ -81,18 +81,18 @@ class ScriptExecutor:
             output = self.shell.read_output_all(str(self.script))
         except NoOutputProduced as err:
             output = err.args[0]
-        self.oi_controller.stdout = self.shell, output, subshell_pid
+        self.oi_controller.stdout = self.shell, output, subshell_pid  # type:ignore
 
     def get_errors(self, subshell_pid: int):
         if self.errors_buffer.exist():
-            self.oi_controller.stderr = (
+            self.oi_controller.stderr = (  # type:ignore
                 self.shell,
                 self.errors_buffer.read(),
                 subshell_pid,
             )
 
     def get_input(self, subshell_pid: int):
-        self.oi_controller.stdin = self.shell, None, subshell_pid
+        self.oi_controller.stdin = self.shell, "", subshell_pid  # type:ignore
 
     def execute_script(self):
         """Execute script as another process"""
