@@ -35,3 +35,7 @@ class NoPidError(Exception):
 
 class NoExitCodeError(Exception):
     """No exit code were produced by process"""
+
+
+class ShellNotSpawned(Exception):
+    """Passed not spawned shell to class which require spawned one"""

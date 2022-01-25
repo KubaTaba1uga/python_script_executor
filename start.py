@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # By default scripts are held in ./scripts directory
     default_scripts_directory = Path(sys.argv[0]).parent.joinpath("scripts")
     # By default errors buffer is in ./scripts directory
-    default_error_buffer_directory = Path(sys.argv[0]).parent.joinpath("scripts")
+    default_error_buffer_directory = Path("/tmp")
 
     output_input_controller = None
     scripts_directory = None
@@ -137,7 +137,9 @@ if __name__ == "__main__":
             except FileNotExecutable:
                 pass
         if not shell:
-            notify_mistake("There is no ", "scripts shell", " available in Your system")
+            notify_mistake(
+                "There is no ", "scripts shell", " available in Your system!!!"
+            )
             exit(127)
 
     if args["-e"] or args["--errors_directory"]:

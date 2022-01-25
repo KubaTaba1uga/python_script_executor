@@ -4,6 +4,7 @@ import pytest
 
 from src.output_input_controller import TerminalOutputInput
 from src.temporary_errors_buffer import TempErrorFile
+from src.script_executor import ScriptExecutor
 from src.script import _ScriptName
 from src.shell import BashShell
 from src.module import Module
@@ -27,6 +28,7 @@ GOOD_SCRIPTS = {
 
 BAD_SCRIPTS = {
     "no_shebang": {"name": "bash_no_shebang.sh", "shebang_path": ""},
+    "create_file": {"name": "create_file.sh"},
     "dir_path": BAD_SCRIPTS_DIR,
 }
 
@@ -84,6 +86,11 @@ def bad_script():
 
 
 @pytest.fixture
+def script_create_file():
+    return Script(BAD_SCRIPTS["create_file"]["name"], BAD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
 def non_existing_path():
     path = "/xyz/cxz/zxc/xcz"
     return Path(path)
@@ -104,3 +111,9 @@ def terminal_oi():
 def temp_err_buffer():
     path = Path("/tmp")
     return TempErrorFile(path)
+
+
+@pytest.fixture
+def script_executor(bash_shell, bash_output_script, terminal_oi, temp_err_buffer):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(bash_output_script, bash_shell, terminal_oi, temp_err_buffer)

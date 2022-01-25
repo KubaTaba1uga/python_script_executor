@@ -34,7 +34,7 @@ class Shell(abc.ABC):
     """Shell module is responsible for spawning the  environment
     in which scripts will be executed and for communicating with them."""
 
-    def __init__(self):
+    def __init__(self, timeout: int = 5):
         path = Path(self.path)
 
         if not path.exists():

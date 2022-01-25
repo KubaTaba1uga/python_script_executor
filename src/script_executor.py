@@ -1,6 +1,6 @@
+from src.exceptions import NoOutputProduced, ShellNotSpawned
 from src.output_input_controller import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
-from src.exceptions import NoOutputProduced
 from src.process import Process
 from src.script import Script
 from src.shell import SubShell
@@ -24,7 +24,7 @@ class ScriptExecutor:
             raise TypeError("oi_controller has to be subclass of OutputInputController")
 
         if not shell.process:
-            raise
+            raise ShellNotSpawned(f"Passed not spawned shell for {script} execution")
 
         self.script = script
         self.shell = shell
@@ -33,6 +33,7 @@ class ScriptExecutor:
 
     @property
     def pid(self) -> int:
+        """Get PID of script in shell output"""
         return self.shell.find_subshell_pid()
 
     @property
@@ -77,6 +78,8 @@ class ScriptExecutor:
         )
 
     def get_output(self, subshell_pid: int):
+        """Get output from shell and pass it to
+        output input controller"""
         try:
             output = self.shell.read_output_all(str(self.script))
         except NoOutputProduced as err:
@@ -84,6 +87,8 @@ class ScriptExecutor:
         self.oi_controller.stdout = self.shell, output, subshell_pid  # type:ignore
 
     def get_errors(self, subshell_pid: int):
+        """Get errors from errors temporary file
+        and pass it to output input controller"""
         if self.errors_buffer.exist():
             self.oi_controller.stderr = (  # type:ignore
                 self.shell,
@@ -92,10 +97,11 @@ class ScriptExecutor:
             )
 
     def get_input(self, subshell_pid: int):
+        """Get input from user and pass it to shell"""
         self.oi_controller.stdin = self.shell, "", subshell_pid  # type:ignore
 
     def execute_script(self):
-        """Execute script as another process"""
+        """Execute script as separeted process"""
 
         command = self._create_execution_command()
 
