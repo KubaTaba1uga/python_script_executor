@@ -24,6 +24,8 @@ class Module:
         return [
             Script(script, self.scripts_folder)
             for script in os.listdir(self.scripts_folder)
+            # As github doesn't allow for empty folders, avoid executing empty folder holder
+            if script != ".gitkeep"
         ]
 
     def _list_sorted_scripts(self) -> list:
