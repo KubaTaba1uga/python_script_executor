@@ -5,16 +5,9 @@ import sys
 
 import pytest
 
+from tests.config import replace_stdin
 from tests.fixtures import bash_shell, terminal_oi
 from src.output_input_controller import OutputInputController
-
-
-@contextmanager
-def replace_stdin(input_string):
-    org_stdin = sys.stdin
-    sys.stdin = StringIO(input_string)
-    yield None
-    sys.stdin = org_stdin
 
 
 def test_terminal_output(bash_shell, terminal_oi):

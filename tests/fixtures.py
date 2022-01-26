@@ -10,7 +10,7 @@ from src.shell import BashShell
 from src.module import Module
 from src.script import Script
 
-from tests.config import GOOD_SCRIPTS_DIR, BAD_SCRIPTS_DIR
+from tests.config import GOOD_SCRIPTS_DIR, BAD_SCRIPTS_DIR, ERRORS_BUFFER_DIR
 
 
 SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
@@ -109,8 +109,7 @@ def terminal_oi():
 
 @pytest.fixture
 def temp_err_buffer():
-    path = Path("/tmp")
-    return TempErrorFile(path)
+    return TempErrorFile(ERRORS_BUFFER_DIR)
 
 
 @pytest.fixture
