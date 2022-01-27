@@ -18,7 +18,7 @@ Options:
 Variants:
 
         Controller names:
-                1. terminal - proint output and errors and if input is required asks for:
+                1. terminal - print output and errors, if input is required asks for:
                          input
                          process termination
                          sleep for 30s
