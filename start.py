@@ -7,21 +7,21 @@ Usage:
         start.py (-d | --scripts_directory) <scripts_path>
         start.py (-s | --shell) <shell_name>
         start.py (-e | --errors_directory) <errors_path>
-        start.py [options]  [<controller_name>]  [<scripts_path>]  [<shell_name>] [<errors_path>]
+        start.py [(-o <controller_name> | --output_input_controller <controller_name>)]  [(-d <scripts_path>| --scripts_directory  <scripts_path>)]  [(-s <shell_name> | --shell <shell_name>)] [(-e <errors_path> |  --errors_directory  <errors_path>)]
 
 Options:
         -o  <controller_name>, --output_input_controller  <controller_name>     Name of the controller which handle output and input.
-
         -d  <scripts_path>, --scripts_directory  <scripts_path>    Path to directory with scripts which will be executed.
-
         -s  <shell_name>, --shell  <shell_name>    Name of the shell in which scripts will be executed.
-
         -e  <errors_path>, --errors_directory <errors_path>     Directory where errors buffer will be used.
 
 Variants:
 
         Controller names:
-                1. terminal
+                1. terminal - proint output and errors and if input is required asks for:
+                         input
+                         process termination
+                         sleep for 30s
 
         Shell names:
                 1. bash
@@ -71,6 +71,8 @@ if __name__ == "__main__":
     shell = None
 
     args = docopt(__doc__)
+
+    print(args)
 
     if args["-o"] or args["--output_input_controller"]:
         for subclass in OutputInputController.__subclasses__():
