@@ -31,7 +31,7 @@ def waiting_termination_continue_input(
         + f'Type "{termination_str}" to terminate script '
         + f'"{waiting_str}" to wait {waiting_period}s'
         + f' "{continue_str}" to skip to next script'
-        + "or anythig else to pass input to script.",
+        + " or anythig else to pass input to script.",
         end="\n" * 2,
     )
 
