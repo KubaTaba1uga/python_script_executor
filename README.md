@@ -20,6 +20,4 @@ To start app with default settings use:
 	python start.py
 
 # Conclusions
-It is better to create bash script to execute another bash scripts in some order
-
-than use python for it.
+It is better to create bash script to execute another bash scripts in some order than use python for it.
