@@ -3,7 +3,9 @@ Python Script Executor organize scripts in order and executes them.
 In case of error or input requirement, output input controller class perform desired actions.
 
 It is mostly education project, so it is not free of unexpected behaviours like:
+
 	bad recognizing of input need
+
 	not catching output if script executed very quickly
 
 # App usage 
