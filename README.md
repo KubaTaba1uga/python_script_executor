@@ -2,11 +2,16 @@
 Python Script Executor organize bash scripts in order and executes them.
 In case of error or input requirement, output input controller class perform desired actions.
 
-It is mostly education project, so it is not free of unexpected behaviours like:
+# App installation
 
-	bad recognizing of input need
+Poetry:
 
-	not catching output if script executed very quickly
+	python3 -m pip install poetry
+	
+App:
+
+	cd python_script_executor
+	python3 -m poetry install
 
 # App usage 
 To order scripts add numbers preceded by `_` to their names. If numbers are missing
@@ -20,6 +25,8 @@ Name Example:
 To start app with default settings use:
 
 	python start.py
+	
+Or using poetry
 
-# Conclusions
-It is better to create bash script to execute another bash scripts in some order than use python for it.
+	python3 -m poetry run python start.py
+
