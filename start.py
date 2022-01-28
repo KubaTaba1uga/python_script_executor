@@ -11,17 +11,22 @@ Usage:
 
 Options:
         -o  <controller_name>, --output_input_controller  <controller_name>     Name of the controller which handle output and input.
-        -d  <scripts_path>, --scripts_directory  <scripts_path>    Path to directory with scripts which will be executed.
-        -s  <shell_name>, --shell  <shell_name>    Name of the shell in which scripts will be executed.
-        -e  <errors_path>, --errors_directory <errors_path>     Directory where errors buffer will be used.
+
+        -d  <scripts_path>, --scripts_directory  <scripts_path>                 Path to directory with scripts which will be executed. 
+                                                                                Directory should have only scripts files inside, 
+                                                                                without directories or non executable files.
+
+        -s  <shell_name>, --shell  <shell_name>                                 Name of the shell in which scripts will be executed.
+
+        -e  <errors_path>, --errors_directory <errors_path>                     Directory where errors buffer will placed.
 
 Variants:
 
         Controller names:
-                1. terminal - print output and errors, if input is required asks for:
-                         input
-                         process termination
-                         sleep for 30s
+                1. terminal - print output and errors and redirect stdin
+                2. terminal&color - print output on green, success on blue, errors and fails on red
+                3. terminal&file - print and save to files output and errors and redirect stdin
+                4. file - save output and errors to files and simulate input with 'y' to bypass all prompts with yes
 
         Shell names:
                 1. bash
@@ -30,32 +35,17 @@ from pathlib import Path
 import sys
 
 from docopt import docopt
-from colorama import Fore, Style
 
 from src.app import main
 from src.shell import SubShell
+from src.cli_utils import (
+    notify_mistake,
+    parse_cli_output_input_controller,
+    parse_cli_scripts_directory,
+)
 from src.exceptions import FileNotExecutable, FileNotFound
 from src.temporary_errors_buffer import TempErrorFile
 from src.output_input_controller import OutputInputController, TerminalOutputInput
-
-
-def notify(output: str):
-    print("\n", output, end="\n" * 2)
-
-
-def notify_mistake(first: str, middle: str, last: str):
-    notify(
-        Style.DIM
-        + Fore.RED
-        + first
-        + Style.RESET_ALL
-        + Fore.RED
-        + Style.BRIGHT
-        + middle
-        + Style.DIM
-        + last
-        + Style.RESET_ALL
-    )
 
 
 if __name__ == "__main__":
@@ -65,46 +55,16 @@ if __name__ == "__main__":
     # By default errors buffer is in ./scripts directory
     default_error_buffer_directory = Path("/tmp")
 
-    output_input_controller = None
-    scripts_directory = None
     errors_directory = None
     shell_class = None
 
     args = docopt(__doc__)
 
-    print(args)
+    output_input_controller = (
+        parse_cli_output_input_controller(args) or default_output_input_controller
+    )
 
-    if args["-o"] or args["--output_input_controller"]:
-        for subclass in OutputInputController.__subclasses__():
-            if args["<controller_name>"] == subclass.command_line_argument:
-                output_input_controller = subclass()
-
-        if not output_input_controller:
-            notify_mistake(
-                "Output input controller named ",
-                f'"{args["<controller_name>"]}"',
-                " was not found!!!",
-            )
-
-            exit(127)
-    else:
-        output_input_controller = default_output_input_controller
-
-    if args["-d"] or args["--scripts_directory"]:
-        path = Path(args["<scripts_path>"])
-        if not path.exists():
-            notify_mistake(
-                "Script directory ",
-                f'"{path}"',
-                " is not present inside file system!!!",
-            )
-            exit(127)
-        elif not path.is_dir():
-            notify_mistake("Script directory ", f'"{path}"', " is not a directory!!!")
-            exit(127)
-        scripts_directory = path
-    else:
-        scripts_directory = default_scripts_directory
+    scripts_directory = parse_cli_scripts_directory(args) or default_scripts_directory
 
     if args["-s"] or args["--shell"]:
         for shell_ in SubShell.__subclasses__():
