@@ -109,21 +109,25 @@ class Shell(abc.ABC):
             return self.lastline
         except pexpect.TIMEOUT:
             # BAD CODE
-            #   Shell is displaying the same line
-            #   over and over, so propably this
-            #   is input need
+            #  Catch situation of input need
+            #    before printing question in
+            #    a loop will happen
             if (
                 self.lastline not in self.process.before
                 or self.lastline != self.process.before
             ):
                 self.lastline = self.process.before
                 # Display input question
+                #  on top of last line
                 sys.stdout.write("\r" + self.lastline)
                 sys.stdout.flush()
                 # Give time for User to type input
                 sleep(10)
                 return ""
             else:
+                #   Shell is displaying the same line
+                #   over and over, so propably this
+                #   is input need
                 self.lastline = ""
                 return self.lastline
 
