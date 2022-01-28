@@ -14,14 +14,17 @@ App:
 	python3 -m poetry install
 
 # App usage 
-To order scripts add numbers preceded by `_` to their names. If numbers are missing
+Copy scripts You would like to execute to python_script_executor/scripts directory.
+
+To order scripts add numbers preceded by `_` to their names ends. If numbers are missing
 scripts will be executed randomly.
 
-Name Example:
+Script Name Examples:
 
 	script_0.sh
-	script_1.sh
-	
+	update-apt-get_1.sh
+	update-upgrade_2.sh
+
 To start app with default settings use:
 
 	python start.py
