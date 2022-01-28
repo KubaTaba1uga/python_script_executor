@@ -6,10 +6,10 @@ import sys
 
 from src.process import Process
 from src.utils import (
-    waiting_termination_continue_input,
     print_error,
     print_info,
     print_success,
+    print_,
 )
 
 if TYPE_CHECKING:
@@ -59,11 +59,11 @@ class OutputInputController(abc.ABC):
 
     @classmethod
     def show_success(cls, script_name: str):
-        print_success("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
+        print_("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print_error("\n" + f"Execution of {script_name} failed" + "\n" * 2)
+        print_("\n" + f"Execution of {script_name} failed" + "\n" * 2)
 
     @classmethod
     def show_status(cls, script_name: str, exit_code: int):
@@ -99,15 +99,6 @@ class OutputInputController(abc.ABC):
         return BaseDescriptor()
 
 
-class TerminalOutputDescriptor(BaseDescriptor):
-    def __set__(self, instance, values: Tuple["SubShell", str, int]):
-        _shell, str_value, subshell_pid = values
-
-        print_info(str_value)
-
-        instance.__dict__[self.name] = str_value
-
-
 class SimpleTerminalInputDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
         shell, str_value, subshell_pid = values
@@ -118,6 +109,15 @@ class SimpleTerminalInputDescriptor(BaseDescriptor):
         shell.send_command(line)
 
 
+class TerminalOutputDescriptor(BaseDescriptor):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
+        _shell, str_value, subshell_pid = values
+
+        print_(str_value)
+
+        instance.__dict__[self.name] = str_value
+
+
 class TerminalErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
         _shell, str_value, subshell_pid = values
@@ -126,7 +126,7 @@ class TerminalErrorDescriptor(BaseDescriptor):
 
         tab = " " * 4
 
-        print_error(
+        print_(
             double_newline
             + "ERROR!!!"
             + double_newline
@@ -148,30 +148,48 @@ class TerminalOutputInput(OutputInputController):
     command_line_argument = "terminal"
 
 
-class AdvancedTerminalInputDescriptor(BaseDescriptor):
-    WAITING = "w"
-    WAITING_PERIOD = 30
-    TERMINATION = "t"
-    CONTINUE = "c"
-
+class TerminalOutputDescriptorColor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
-        """Ask user for input only when process
-        is sleeping. This is not ideal solution,
-        however i couldn't find any better"""
-        shell, str_value, subshell_pid = values
+        _shell, str_value, subshell_pid = values
 
-        if Process.is_sleeping(subshell_pid):
-            str_value = waiting_termination_continue_input(
-                self.WAITING, self.WAITING_PERIOD, self.TERMINATION, self.CONTINUE
-            )
-
-            if str_value.lower() == self.WAITING:
-                sleep(self.WAITING_PERIOD)
-            elif str_value.lower() == self.TERMINATION:
-                Process.kill(subshell_pid)
-            elif str_value.lower() == self.CONTINUE:
-                instance.continue_flag = True
-            else:
-                shell.send_command(str_value)
+        print_info(str_value)
 
         instance.__dict__[self.name] = str_value
+
+
+class TerminalErrorDescriptorColor(BaseDescriptor):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
+        _shell, str_value, subshell_pid = values
+
+        double_newline = "\n" * 2
+
+        tab = " " * 4
+
+        print_error(
+            double_newline
+            + "ERROR!!!"
+            + double_newline
+            + tab
+            + f"{str_value}"
+            + "\n"
+            + "ERROR!!!"
+            + "\n" * 2
+        )
+
+        instance.__dict__[self.name] = str_value
+
+
+class TerminalOutputInputColor(OutputInputController):
+    stdin = SimpleTerminalInputDescriptor()
+    stdout = TerminalOutputDescriptorColor()
+    stderr = TerminalErrorDescriptorColor()
+
+    command_line_argument = "terminal&color"
+
+    @classmethod
+    def show_success(cls, script_name: str):
+        print_success("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
+
+    @classmethod
+    def show_failure(cls, script_name: str):
+        print_error("\n" + f"Execution of {script_name} failed" + "\n" * 2)

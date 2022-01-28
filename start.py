@@ -37,28 +37,21 @@ import sys
 from docopt import docopt
 
 from src.app import main
-from src.shell import SubShell
 from src.cli_utils import (
-    notify_mistake,
     parse_cli_output_input_controller,
     parse_cli_scripts_directory,
     parse_cli_shell,
     parse_cli_errors_directory,
 )
-from src.exceptions import FileNotExecutable, FileNotFound
-from src.temporary_errors_buffer import TempErrorFile
-from src.output_input_controller import OutputInputController, TerminalOutputInput
+from src.output_input_controller import TerminalOutputInput
 
 
 if __name__ == "__main__":
     default_output_input_controller = TerminalOutputInput()
     # By default scripts are held in ./scripts directory
     default_scripts_directory = Path(sys.argv[0]).parent.joinpath("scripts")
-    # By default errors buffer is in ./scripts directory
+    # By default errors buffer is used in /tmp directory
     default_error_buffer_directory = Path("/tmp")
-
-    errors_directory = None
-    shell_class = None
 
     args = docopt(__doc__)
 
