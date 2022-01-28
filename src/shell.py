@@ -10,6 +10,7 @@ Environment, in which scripts will be executed in,
 """
 from typing import Dict, Generator, TypeVar, Type
 from pathlib import Path
+from time import sleep
 import abc
 import sys
 import os
@@ -42,8 +43,10 @@ class Shell(abc.ABC):
         if not pexpect.utils.is_executable_file(path):
             raise FileNotExecutable(f"{path} is not executable")
 
-        self.process = None
         self.timeout = timeout
+
+        self.process = None
+        self.lastline = ""
 
     def __iter__(self) -> Generator:
         while line := self.read_output_line():
@@ -102,9 +105,27 @@ class Shell(abc.ABC):
 
     def read_output_line(self) -> str:
         try:
-            return self.process.readline()
+            self.lastline = self.process.readline()
+            return self.lastline
         except pexpect.TIMEOUT:
-            return ""
+            # BAD CODE
+            #   Shell is displaying the same line
+            #   over and over, so propably this
+            #   is input need
+            if (
+                self.lastline not in self.process.before
+                or self.lastline != self.process.before
+            ):
+                self.lastline = self.process.before
+                # Display input question
+                sys.stdout.write("\r" + self.lastline)
+                sys.stdout.flush()
+                # Give time for User to type input
+                sleep(10)
+                return ""
+            else:
+                self.lastline = ""
+                return self.lastline
 
 
 class SubShell(Shell):
@@ -210,8 +231,13 @@ class SubShell(Shell):
 
     def get_subshell_exit_code(self) -> int:
         command = self._create_subshell_exit_code_command()
-        self.send_command(command)
-        return self.find_subshell_exit_code()
+        while True:
+            # Try to extract exit code until succeed
+            self.send_command(command)
+            try:
+                return self.find_subshell_exit_code()
+            except NoExitCodeError:
+                pass
 
 
 class BashShell(SubShell):

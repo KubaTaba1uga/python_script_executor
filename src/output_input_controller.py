@@ -102,10 +102,7 @@ class OutputInputController(abc.ABC):
 class SimpleTerminalInputDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
         shell, str_value, subshell_pid = values
-        if not str_value:
-            line = sys.stdin.readline()
-        else:
-            line = str_value
+        line = sys.stdin.readline()
         shell.send_command(line)
 
 

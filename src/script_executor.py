@@ -106,13 +106,14 @@ class ScriptExecutor:
             # Create event loop, which will expire after 1s
             #   it is needed for case when input is blocking
             #   execution but is not required by script
-            readers, _, _ = select([sys.stdin], [], [], 1)
+            readers, _, _ = select([sys.stdin, sys.stdout], [], [], 1)
             for reader in readers:
-                self.oi_controller.stdin = (
-                    self.shell,
-                    "",
-                    subshell_pid,
-                )
+                if reader is sys.stdin:
+                    self.oi_controller.stdin = (
+                        self.shell,
+                        "",
+                        subshell_pid,
+                    )
 
     def execute_script(self):
         """Execute script as separeted process"""
@@ -127,13 +128,13 @@ class ScriptExecutor:
 
         with self.errors_buffer:
             Thread(target=self.get_output, args=[pid, lambda: threads_alive]).start()
-            Thread(target=self.get_input, args=[pid, lambda: threads_alive]).start()
             Thread(target=self.get_errors, args=[pid, lambda: threads_alive]).start()
+            Thread(target=self.get_input, args=[pid, lambda: threads_alive]).start()
 
             while Process.is_alive(pid) and not self.oi_controller.continue_flag:
                 pass
             else:
-                # Wait for all output to be gatherd
+                # Wait until all output is gathered
                 sleep(1)
                 # Kill threads
                 threads_alive = False

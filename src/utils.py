@@ -1,5 +1,7 @@
 from colorama import Fore, Style
 
+import sys
+
 
 def print_info(output: str):
     print(Fore.GREEN + output + Style.RESET_ALL, end="")
@@ -14,4 +16,5 @@ def print_success(output: str):
 
 
 def print_(output: str):
-    print(Style.RESET_ALL + output + Style.RESET_ALL, end="")
+    sys.stdout.write(Style.RESET_ALL + output + Style.RESET_ALL)
+    sys.stdout.flush()
