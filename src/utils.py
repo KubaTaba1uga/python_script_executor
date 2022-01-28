@@ -1,3 +1,6 @@
+from colorama import Fore, Style
+
+
 def xyz_required(question: str) -> bool:
     """Ask question until correct choice is not provided"""
     input_invalid = True
@@ -40,3 +43,15 @@ def waiting_termination_continue_input(
     print()
 
     return result
+
+
+def print_info(output: str):
+    print(Fore.GREEN + output + Style.RESET_ALL, end="")
+
+
+def print_error(output: str):
+    print(Fore.RED + output + Style.RESET_ALL, end="")
+
+
+def print_success(output: str):
+    print(Fore.BLUE + output + Style.RESET_ALL, end="")

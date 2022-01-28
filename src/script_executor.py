@@ -1,3 +1,8 @@
+from threading import Thread
+from select import select
+from time import sleep
+import sys
+
 from src.exceptions import NoOutputProduced, ShellNotSpawned
 from src.output_input_controller import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
@@ -77,43 +82,61 @@ class ScriptExecutor:
             + self.shell.subshell["end"]
         )
 
-    def get_output(self, subshell_pid: int):
+    def get_output(self, subshell_pid: int, stop):
         """Get output from shell and pass it to
         output input controller"""
-        try:
-            output = self.shell.read_output_all(str(self.script))
-        except NoOutputProduced as err:
-            output = err.args[0]
-        self.oi_controller.stdout = self.shell, output, subshell_pid  # type:ignore
+        while stop():
+            output = self.shell.read_output_line()
+            self.oi_controller.stdout = self.shell, output, subshell_pid  # type:ignore
 
-    def get_errors(self, subshell_pid: int):
+    def get_errors(self, subshell_pid: int, stop):
         """Get errors from errors temporary file
         and pass it to output input controller"""
-        if self.errors_buffer.exist():
-            self.oi_controller.stderr = (  # type:ignore
-                self.shell,
-                self.errors_buffer.read(),
-                subshell_pid,
-            )
+        while stop():
+            if self.errors_buffer.exist():
+                self.oi_controller.stderr = (  # type:ignore
+                    self.shell,
+                    self.errors_buffer.read(),
+                    subshell_pid,
+                )
 
-    def get_input(self, subshell_pid: int):
+    def get_input(self, subshell_pid: int, stop):
         """Get input from user and pass it to shell"""
-        self.oi_controller.stdin = self.shell, "", subshell_pid  # type:ignore
+        while stop():
+            # Create event loop, which will expire after 1s
+            #   it is needed for case when input is blocking
+            #   execution but is not required by script
+            readers, _, _ = select([sys.stdin], [], [], 1)
+            for reader in readers:
+                self.oi_controller.stdin = (
+                    self.shell,
+                    "",
+                    subshell_pid,
+                )
 
     def execute_script(self):
         """Execute script as separeted process"""
 
         command = self._create_execution_command()
 
+        threads_alive = True
+
         self.shell.send_command(command)
 
         pid = self.pid
 
         with self.errors_buffer:
+            Thread(target=self.get_output, args=[pid, lambda: threads_alive]).start()
+            Thread(target=self.get_input, args=[pid, lambda: threads_alive]).start()
+            Thread(target=self.get_errors, args=[pid, lambda: threads_alive]).start()
+
             while Process.is_alive(pid) and not self.oi_controller.continue_flag:
-                self.get_output(pid)
-                self.get_errors(pid)
-                self.get_input(pid)
+                pass
+            else:
+                # Wait for all output to be gatherd
+                sleep(1)
+                # Kill threads
+                threads_alive = False
 
             if not self.oi_controller.continue_flag:
                 self.oi_controller.show_status(self.script, self.exit_code)

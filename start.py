@@ -68,7 +68,7 @@ if __name__ == "__main__":
     output_input_controller = None
     scripts_directory = None
     errors_directory = None
-    shell = None
+    shell_class = None
 
     args = docopt(__doc__)
 
@@ -110,7 +110,8 @@ if __name__ == "__main__":
         for shell_ in SubShell.__subclasses__():
             if args["<shell_name>"] == shell_.command_line_argument:
                 try:
-                    shell = shell_()
+                    shell_class = shell_()
+                    shell_class = shell_
                 except FileNotFound:
                     notify_mistake(
                         "Scripts shell ", f'"{shell_.path}"', " was not found!!!"
@@ -123,7 +124,7 @@ if __name__ == "__main__":
                         " is not executable!!!",
                     )
                     exit(127)
-        if not shell:
+        if not shell_class:
             notify_mistake(
                 "Scripts shell ", f'"{args["<shell_name>"]}"', " was not found!!!"
             )
@@ -132,13 +133,14 @@ if __name__ == "__main__":
     else:
         for shell_ in SubShell.__subclasses__():
             try:
-                shell = shell_()
+                shell_class = shell_()
+                shell_class = shell_
                 break
             except FileNotFound:
                 pass
             except FileNotExecutable:
                 pass
-        if not shell:
+        if not shell_class:
             notify_mistake(
                 "There is no ", "scripts shell", " available in Your system!!!"
             )
@@ -161,7 +163,7 @@ if __name__ == "__main__":
         errors_directory = default_error_buffer_directory
 
     main(
-        shell=shell,
+        shell=shell_class,
         script_folder_path=scripts_directory,
         oi_controller=output_input_controller,
         errors_buffer_path=errors_directory,

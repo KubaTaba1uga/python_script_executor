@@ -43,13 +43,14 @@ class Shell(abc.ABC):
             raise FileNotExecutable(f"{path} is not executable")
 
         self.process = None
+        self.timeout = timeout
 
     def __iter__(self) -> Generator:
         while line := self.read_output_line():
             yield line
 
     def __enter__(self):
-        self.spawn_shell()
+        self.spawn_shell(self.timeout)
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tryceback):

@@ -2,9 +2,15 @@ from typing import TYPE_CHECKING
 from typing import Tuple
 from time import sleep
 import abc
+import sys
 
 from src.process import Process
-from src.utils import waiting_termination_continue_input
+from src.utils import (
+    waiting_termination_continue_input,
+    print_error,
+    print_info,
+    print_success,
+)
 
 if TYPE_CHECKING:
     from src.shell import SubShell
@@ -53,11 +59,11 @@ class OutputInputController(abc.ABC):
 
     @classmethod
     def show_success(cls, script_name: str):
-        print("\n" + f"Execution of {script_name} succeed" + "\n")
+        print_success("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print("\n" + f"Execution of {script_name} failed" + "\n")
+        print_error("\n" + f"Execution of {script_name} failed" + "\n" * 2)
 
     @classmethod
     def show_status(cls, script_name: str, exit_code: int):
@@ -97,12 +103,52 @@ class TerminalOutputDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
         _shell, str_value, subshell_pid = values
 
-        print(str_value)
+        print_info(str_value)
 
         instance.__dict__[self.name] = str_value
 
 
-class TerminalInputDescriptor(BaseDescriptor):
+class SimpleTerminalInputDescriptor(BaseDescriptor):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
+        shell, str_value, subshell_pid = values
+        if not str_value:
+            line = sys.stdin.readline()
+        else:
+            line = str_value
+        shell.send_command(line)
+
+
+class TerminalErrorDescriptor(BaseDescriptor):
+    def __set__(self, instance, values: Tuple["SubShell", str, int]):
+        _shell, str_value, subshell_pid = values
+
+        double_newline = "\n" * 2
+
+        tab = " " * 4
+
+        print_error(
+            double_newline
+            + "ERROR!!!"
+            + double_newline
+            + tab
+            + f"{str_value}"
+            + "\n"
+            + "ERROR!!!"
+            + "\n" * 2
+        )
+
+        instance.__dict__[self.name] = str_value
+
+
+class TerminalOutputInput(OutputInputController):
+    stdin = SimpleTerminalInputDescriptor()
+    stdout = TerminalOutputDescriptor()
+    stderr = TerminalErrorDescriptor()
+
+    command_line_argument = "terminal"
+
+
+class AdvancedTerminalInputDescriptor(BaseDescriptor):
     WAITING = "w"
     WAITING_PERIOD = 30
     TERMINATION = "t"
@@ -129,33 +175,3 @@ class TerminalInputDescriptor(BaseDescriptor):
                 shell.send_command(str_value)
 
         instance.__dict__[self.name] = str_value
-
-
-class TerminalErrorDescriptor(BaseDescriptor):
-    def __set__(self, instance, values: Tuple["SubShell", str, int]):
-        _shell, str_value, subshell_pid = values
-
-        double_newline = "\n" * 2
-
-        tab = " " * 4
-
-        print(
-            double_newline
-            + "ERROR!!!"
-            + double_newline
-            + tab
-            + f"{str_value}"
-            + double_newline
-            + "ERROR!!!",
-            end=double_newline,
-        )
-
-        instance.__dict__[self.name] = str_value
-
-
-class TerminalOutputInput(OutputInputController):
-    stdin = TerminalInputDescriptor()
-    stdout = TerminalOutputDescriptor()
-    stderr = TerminalErrorDescriptor()
-
-    command_line_argument = "terminal"
