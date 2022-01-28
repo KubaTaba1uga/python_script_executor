@@ -16,7 +16,7 @@ def main(
 
     errors_buffer = TempErrorFile(errors_buffer_path)
 
-    with shell as sh:
+    with shell(0.01) as sh:
         for script in Module(script_folder_path):
 
             sc_ex = ScriptExecutor(script, sh, oi_controller, errors_buffer)
