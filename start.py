@@ -23,10 +23,10 @@ Options:
 Variants:
 
         Controller names:
-                1. terminal - print output and errors and redirect stdin
-                2. terminal&color - print output on green, success on blue, errors and fails on red
-                3. terminal&file - print and save to files output and errors and redirect stdin
-                4. file - save output and errors to files and simulate input with 'y' to bypass all prompts with yes
+                1. terminal         print output and errors and redirect stdin.
+                2. terminal&color   print output on green, success on blue, errors and fails on red.
+                3. terminal&file    print and save to files output and errors and redirect stdin.
+                4. file             save output and errors to files and simulate input with 'y' to bypass all prompts with yes.
 
         Shell names:
                 1. bash
@@ -42,6 +42,8 @@ from src.cli_utils import (
     notify_mistake,
     parse_cli_output_input_controller,
     parse_cli_scripts_directory,
+    parse_cli_shell,
+    parse_cli_errors_directory,
 )
 from src.exceptions import FileNotExecutable, FileNotFound
 from src.temporary_errors_buffer import TempErrorFile
@@ -66,61 +68,11 @@ if __name__ == "__main__":
 
     scripts_directory = parse_cli_scripts_directory(args) or default_scripts_directory
 
-    if args["-s"] or args["--shell"]:
-        for shell_ in SubShell.__subclasses__():
-            if args["<shell_name>"] == shell_.command_line_argument:
-                try:
-                    shell_class = shell_()
-                    shell_class = shell_
-                except FileNotFound:
-                    notify_mistake(
-                        "Scripts shell ", f'"{shell_.path}"', " was not found!!!"
-                    )
-                    exit(127)
-                except FileNotExecutable:
-                    notify_mistake(
-                        "Scripts shell ",
-                        f'"{shell_.path}"',
-                        " is not executable!!!",
-                    )
-                    exit(127)
-        if not shell_class:
-            notify_mistake(
-                "Scripts shell ", f'"{args["<shell_name>"]}"', " was not found!!!"
-            )
-            exit(127)
+    shell_class = parse_cli_shell(args)
 
-    else:
-        for shell_ in SubShell.__subclasses__():
-            try:
-                shell_class = shell_()
-                shell_class = shell_
-                break
-            except FileNotFound:
-                pass
-            except FileNotExecutable:
-                pass
-        if not shell_class:
-            notify_mistake(
-                "There is no ", "scripts shell", " available in Your system!!!"
-            )
-            exit(127)
-
-    if args["-e"] or args["--errors_directory"]:
-        path = Path(args["<errors_path>"])
-        if not path.exists():
-            notify_mistake(
-                "Errors directory ",
-                f'"{path}"',
-                " is not present inside file system!!!",
-            )
-            exit(127)
-        elif not path.is_dir():
-            notify_mistake("Errors directory ", f'"{path}"', " is not a directory!!!")
-            exit(127)
-        errors_directory = path
-    else:
-        errors_directory = default_error_buffer_directory
+    errors_directory = (
+        parse_cli_errors_directory(args) or default_error_buffer_directory
+    )
 
     main(
         shell=shell_class,
