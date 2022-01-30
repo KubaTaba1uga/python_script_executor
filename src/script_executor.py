@@ -125,7 +125,5 @@ class ScriptExecutor:
                     elif fd is sys.stdout:
                         self.get_output(pid)
                 self.get_errors(pid)
-            else:
-                self.get_output(pid)
 
             self.oi_controller.show_status(self.script, self.exit_code)
