@@ -106,30 +106,14 @@ class Shell(abc.ABC):
     def read_output_line(self) -> str:
         try:
             self.lastline = self.process.readline()
-            return self.lastline
         except pexpect.TIMEOUT:
-            # BAD CODE
-            #  Catch situation of input need
-            #    before printing question in
-            #    a loop will happen
-            if (
-                self.lastline not in self.process.before
-                or self.lastline != self.process.before
-            ):
-                self.lastline = self.process.before
-                # Display input question
-                #  on top of last line
-                sys.stdout.write("\r" + self.lastline)
-                sys.stdout.flush()
-                # Give time for User to type input
-                sleep(10)
-                return ""
-            else:
-                #   Shell is displaying the same line
-                #   over and over, so propably this
-                #   is input need
+            if self.lastline == self.process.before:
                 self.lastline = ""
-                return self.lastline
+            elif self.lastline in self.process.before:
+                self.lastline = ""
+            else:
+                self.lastline = self.process.before
+        return self.lastline
 
 
 class SubShell(Shell):

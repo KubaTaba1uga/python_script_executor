@@ -49,14 +49,6 @@ class OutputInputController(abc.ABC):
     Use descriptors to override abstract class properties.
     """
 
-    def __init__(self):
-        # Flag is responsible for skipping script execution.
-        # In case a user would like to execute next script
-        # without killing previous one. It is useful feature
-        # for ssh loging when user would like to not terminate
-        # connection and execute scripts on remote machine.
-        self.continue_flag = False
-
     @classmethod
     def show_success(cls, script_name: str):
         print_("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
@@ -102,7 +94,9 @@ class OutputInputController(abc.ABC):
 class SimpleTerminalInputDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):
         shell, str_value, subshell_pid = values
+
         line = sys.stdin.readline()
+
         shell.send_command(line)
 
 

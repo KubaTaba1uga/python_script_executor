@@ -13,7 +13,6 @@ docopt = "^0.6.2"
 colorama = "^0.4.4"
 
 [tool.poetry.dev-dependencies]
-ipython = "^8.0.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
