@@ -1,14 +1,13 @@
-from threading import Thread
 from select import select
 from time import sleep
 import sys
 
-from src.exceptions import NoOutputProduced, ShellNotSpawned
 from src.output_input_controller import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
+from src.exceptions import ShellNotSpawned
 from src.process import Process
-from src.script import Script
 from src.shell import SubShell
+from src.script import Script
 
 
 class ScriptExecutor:
@@ -108,7 +107,8 @@ class ScriptExecutor:
 
     def execute_script(self):
         """Execute script as separeted process"""
-
+        if not self.shell.process:
+            self.shell.spawn_shell()
         command = self._create_execution_command()
 
         self.shell.send_command(command)
@@ -118,7 +118,9 @@ class ScriptExecutor:
         with self.errors_buffer:
 
             while Process.is_alive(pid) or self.shell.lastline:
-                readers, writers, _ = select([sys.stdin], [sys.stdout], [], 1)
+                # Create event loop for blocking
+                #    input/output operations
+                readers, writers, _ = select([sys.stdin], [sys.stdout], [], 0.1)
                 for fd in readers + writers:
                     if fd is sys.stdin:
                         self.get_input(pid)

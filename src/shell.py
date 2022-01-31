@@ -8,13 +8,9 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
-from typing import Dict, Generator, TypeVar, Type
+from typing import Dict, Generator
 from pathlib import Path
-from time import sleep
 import abc
-import sys
-import os
-
 
 import pexpect
 
@@ -25,10 +21,6 @@ from src.exceptions import (
     NoPidError,
     NoExitCodeError,
 )
-from src.script import Script
-from src.process import Process
-from src.output_input_controller import OutputInputController
-from src.temporary_errors_buffer import TempErrorFile
 
 
 class Shell(abc.ABC):
@@ -46,11 +38,15 @@ class Shell(abc.ABC):
         self.timeout = timeout
 
         self.process = None
+
         self.lastline = ""
 
     def __iter__(self) -> Generator:
         while line := self.read_output_line():
             yield line
+
+    def __call__(self, timeout: int):
+        self.timeout = timeout
 
     def __enter__(self):
         self.spawn_shell(self.timeout)
@@ -78,8 +74,10 @@ class Shell(abc.ABC):
         """
         return cls.__name__.lower()
 
-    def spawn_shell(self, timeout: int = 5):
+    def spawn_shell(self, timeout=None):
         """Spawn shell using self.path, and execute script within it."""
+        if not timeout:
+            timeout = self.timeout
         self.process = pexpect.spawn(self.path, encoding="utf-8", timeout=timeout)
 
     def send_command(self, command: str):
@@ -107,9 +105,11 @@ class Shell(abc.ABC):
         try:
             self.lastline = self.process.readline()
         except pexpect.TIMEOUT:
-            if self.lastline == self.process.before:
-                self.lastline = ""
-            elif self.lastline in self.process.before:
+            if (
+                self.lastline == self.process.before
+                or self.lastline in self.process.before
+                or self.process.before in self.lastline
+            ):
                 self.lastline = ""
             else:
                 self.lastline = self.process.before

@@ -17,7 +17,6 @@ SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
 
 SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
 
-
 GOOD_SCRIPTS = {
     "shebang": {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"},
     "output": {"name": "bash_output_1.sh"},
@@ -116,3 +115,25 @@ def temp_err_buffer():
 def script_executor(bash_shell, bash_output_script, terminal_oi, temp_err_buffer):
     bash_shell.spawn_shell(timeout=0.2)
     return ScriptExecutor(bash_output_script, bash_shell, terminal_oi, temp_err_buffer)
+
+
+import sys
+import io
+
+
+@pytest.fixture(scope="class")
+def suspend_capture(pytestconfig):
+    class suspend_guard:
+        def __init__(self):
+            self.capmanager = pytestconfig.pluginmanager.getplugin("capturemanager")
+
+        def __enter__(self):
+            self.capmanager.suspend_global_capture(in_=True)
+            self.org_stdout = sys.stdout
+            sys.stdout = io.StringIO()
+
+        def __exit__(self, _1, _2, _3):
+            self.capmanager.resume_global_capture()
+            sys.stdout = self.org_stdout
+
+    yield suspend_guard()

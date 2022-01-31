@@ -99,6 +99,8 @@ class SimpleTerminalInputDescriptor(BaseDescriptor):
 
         shell.send_command(line)
 
+        instance.__dict__[self.name] = line
+
 
 class TerminalOutputDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["SubShell", str, int]):

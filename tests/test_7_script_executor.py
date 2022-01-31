@@ -11,6 +11,7 @@ from tests.fixtures import (
     script_executor,
     script_create_file,
 )
+from tests.config import replace_stdin
 from src.script_executor import ScriptExecutor
 from src.exceptions import ShellNotSpawned
 
@@ -62,11 +63,3 @@ def test__create_execution_command(script_executor):
         sh.send_command(command)
         assert isinstance(script_executor.pid, int)
         assert script_executor.exit_code == 0
-
-
-def test_execute_script(executor_create_file):
-    file_path = Path("/tmp/test_file")
-    with executor_create_file.shell:
-        executor_create_file.execute_script()
-        assert file_path.exists() is True
-        os.remove(file_path)
