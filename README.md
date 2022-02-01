@@ -1,3 +1,5 @@
+[![PyTest](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml/badge.svg?branch=master)](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml)
+
 # App description 
 Python Script Executor organize bash scripts in order and executes them.
 In case of error or input requirement, output input controller class perform desired actions.
