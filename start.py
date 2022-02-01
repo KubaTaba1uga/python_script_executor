@@ -1,35 +1,28 @@
 #!/bin/env python
 """
+        Usage:
+                doc_opt_test.py [-s SHELL] [-d SCRIPTS_DIRECTORY] [-o OUTPUT_INPUT_CONTROLLER] [-e ERRORS_BUFFER_PATH]
 
-Usage:
-        start.py
-        start.py (-o | --output_input_controller) <controller_name>
-        start.py (-d | --scripts_directory) <scripts_path>
-        start.py (-s | --shell) <shell_name>
-        start.py (-e | --errors_directory) <errors_path>
-        start.py [(-o <controller_name> | --output_input_controller <controller_name>)]  [(-d <scripts_path>| --scripts_directory  <scripts_path>)]  [(-s <shell_name> | --shell <shell_name>)] [(-e <errors_path> |  --errors_directory  <errors_path>)]
+        Options:
+                -s SHELL                        Shell by which scripts will be executed.
+                -d SCRIPTS_DIRECTORY            Directory with scripts which will be executed.
+                -o OUTPUT_INPUT_CONTROLLER      Input/Output handler.
+                -e ERRORS_BUFFER_PATH           Path to temporary errors file buffer.
 
-Options:
-        -o  <controller_name>, --output_input_controller  <controller_name>     Name of the controller which handle output and input.
+        Variants:
 
-        -d  <scripts_path>, --scripts_directory  <scripts_path>                 Path to directory with scripts which will be executed. 
-                                                                                Directory should have only scripts files inside, 
-                                                                                without directories or non executable files.
+                Controller names:
+                        1. terminal         print output and errors and redirect stdin to user terminal.
+                        2. terminalcolor    print output on green, success on blue, errors and fails on
+                                               red and redirect stidn to user terminal.
+                        3. terminalfile     print and save output and errors to files with redirected
+                                               stdin to user terminal.
+                        4. file             save output and errors to files and simulate input with 'y'
+                                               to bypass all prompts with yes.
 
-        -s  <shell_name>, --shell  <shell_name>                                 Name of the shell in which scripts will be executed.
+                Shell names:
+                        1. bash             execute scripts by /bin/bash.
 
-        -e  <errors_path>, --errors_directory <errors_path>                     Directory where errors buffer will placed.
-
-Variants:
-
-        Controller names:
-                1. terminal         print output and errors and redirect stdin.
-                2. terminal&color   print output on green, success on blue, errors and fails on red.
-                3. terminal&file    print and save to files output and errors and redirect stdin.
-                4. file             save output and errors to files and simulate input with 'y' to bypass all prompts with yes.
-
-        Shell names:
-                1. bash
 """
 from pathlib import Path
 import sys
@@ -42,9 +35,10 @@ from src.cli_utils import (
     parse_cli_scripts_directory,
     parse_cli_shell,
     parse_cli_errors_directory,
+    notify_mistake,
 )
 from src.output_input_controller import TerminalOutputInput
-
+from src.exceptions import FileNotFound, FileNotExecutable
 
 if __name__ == "__main__":
     default_output_input_controller = TerminalOutputInput()
@@ -63,7 +57,19 @@ if __name__ == "__main__":
 
     scripts_directory = parse_cli_scripts_directory(args) or default_scripts_directory
 
-    shell = parse_cli_shell(args)
+    if shell := parse_cli_shell(args):
+        pass
+    else:
+        for subshell in SubShell.__subclasses__():
+            try:
+                shell = subshell()
+            except FileNotFound:
+                pass
+            except FileNotExecutable:
+                pass
+
+        notify_mistake("There is no ", "scripts shell", " available in Your system!!!")
+        exit(127)
 
     errors_directory = (
         parse_cli_errors_directory(args) or default_error_buffer_directory
