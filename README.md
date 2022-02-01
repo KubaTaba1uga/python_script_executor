@@ -1,3 +1,5 @@
+[![Python application](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/python-app.yml/badge.svg)](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/python-app.yml)
+
 # App description 
 Python Script Executor organize bash scripts in order and executes them.
 In case of error or input requirement, output input controller class perform desired actions.
