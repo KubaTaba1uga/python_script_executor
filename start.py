@@ -35,7 +35,7 @@ from src.cli_utils import (
     parse_cli_scripts_directory,
     parse_cli_shell,
     parse_cli_errors_directory,
-    notify_mistake,
+    find_shell,
 )
 from src.output_input_controller import TerminalOutputInput
 from src.exceptions import FileNotFound, FileNotExecutable
@@ -57,19 +57,7 @@ if __name__ == "__main__":
 
     scripts_directory = parse_cli_scripts_directory(args) or default_scripts_directory
 
-    if shell := parse_cli_shell(args):
-        pass
-    else:
-        for subshell in SubShell.__subclasses__():
-            try:
-                shell = subshell()
-            except FileNotFound:
-                pass
-            except FileNotExecutable:
-                pass
-
-        notify_mistake("There is no ", "scripts shell", " available in Your system!!!")
-        exit(127)
+    shell = parse_cli_shell(args) or find_shell()
 
     errors_directory = (
         parse_cli_errors_directory(args) or default_error_buffer_directory

@@ -81,17 +81,18 @@ def parse_cli_shell(args: dict) -> SubShell:
         notify_mistake("Scripts shell ", f'"{args["-s"]}"', " was not found!!!")
         exit(127)
 
-    else:
-        for shell in SubShell.__subclasses__():
-            try:
-                return shell()
-            except FileNotFound:
-                pass
-            except FileNotExecutable:
-                pass
 
-        notify_mistake("There is no ", "scripts shell", " available in Your system!!!")
-        exit(127)
+def find_shell():
+    for subshell in SubShell.__subclasses__():
+        try:
+            return subshell()
+        except FileNotFound:
+            pass
+        except FileNotExecutable:
+            pass
+
+    notify_mistake("There is no ", "scripts shell", " available in Your system!!!")
+    exit(127)
 
 
 def parse_cli_errors_directory(args: dict) -> Optional[Path]:
