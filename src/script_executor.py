@@ -1,5 +1,4 @@
 from select import select
-from time import sleep
 import sys
 
 from src.output_input_controller import OutputInputController
