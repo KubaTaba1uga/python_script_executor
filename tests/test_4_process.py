@@ -1,7 +1,5 @@
 from time import sleep
 
-from tests.fixtures import popen_process
-
 from src.process import Process
 
 

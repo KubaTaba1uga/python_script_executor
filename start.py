@@ -38,7 +38,6 @@ from src.cli_utils import (
     find_shell,
 )
 from src.output_input_controllers.terminal_oi import TerminalOutputInput
-from src.exceptions import FileNotFound, FileNotExecutable
 
 if __name__ == "__main__":
     default_output_input_controller = TerminalOutputInput()

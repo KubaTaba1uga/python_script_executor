@@ -4,9 +4,6 @@ import abc
 
 from src.utils import (
     format_indent,
-    print_error,
-    print_info,
-    print_success,
     print_,
 )
 

@@ -2,7 +2,8 @@ import pytest
 
 from src.script import Script
 from src.exceptions import NoShebangError, FileNotFound
-from tests.fixtures import non_existing_path, script_shebang, bad_script, GOOD_SCRIPTS
+
+from tests.config import GOOD_SCRIPTS
 
 
 def test_script__init__error(non_existing_path):

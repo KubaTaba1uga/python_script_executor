@@ -1,11 +1,6 @@
-from pathlib import Path
-import sys
-
-import pytest
+from src.output_input_controllers.base import OutputInputController
 
 from tests.config import replace_stdin
-from tests.fixtures import bash_shell
-from src.output_input_controllers.base import OutputInputController
 
 
 def test_terminal_output(bash_shell):

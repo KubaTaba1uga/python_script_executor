@@ -10,26 +10,13 @@ from src.shell import BashShell
 from src.module import Module
 from src.script import Script
 
-from tests.config import GOOD_SCRIPTS_DIR, BAD_SCRIPTS_DIR, ERRORS_BUFFER_DIR
-
-
-SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
-
-SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
-
-GOOD_SCRIPTS = {
-    "shebang": {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"},
-    "output": {"name": "bash_output_1.sh"},
-    "input": {"name": "bash_input_2.sh"},
-    "error": {"name": "bash_error_4.sh"},
-    "dir_path": GOOD_SCRIPTS_DIR,
-}
-
-BAD_SCRIPTS = {
-    "no_shebang": {"name": "bash_no_shebang.sh", "shebang_path": ""},
-    "create_file": {"name": "create_file.sh"},
-    "dir_path": BAD_SCRIPTS_DIR,
-}
+from tests.config import (
+    GOOD_SCRIPTS,
+    BAD_SCRIPTS,
+    ERRORS_BUFFER_DIR,
+    SCRIPT_WITH_NUMBER_NAME,
+    SCRIPT_WITHOUT_NUMBER_NAME,
+)
 
 
 @pytest.fixture

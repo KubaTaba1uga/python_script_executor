@@ -1,16 +1,5 @@
-from pathlib import Path
-import os
-
 import pytest
 
-from tests.fixtures import (
-    bash_output_script,
-    bash_shell,
-    terminal_oi,
-    temp_err_buffer,
-    script_executor,
-)
-from tests.config import replace_stdin
 from src.script_executor import ScriptExecutor
 from src.exceptions import ShellNotSpawned
 

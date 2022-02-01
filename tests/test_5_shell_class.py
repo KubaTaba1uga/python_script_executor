@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from pexpect.pty_spawn import spawn
 from pexpect.exceptions import TIMEOUT
@@ -7,11 +5,6 @@ from pexpect.exceptions import TIMEOUT
 from src.shell import SubShell
 from src.process import Process
 from src.exceptions import FileNotFound, FileNotExecutable
-from tests.fixtures import (
-    non_executable_path,
-    non_existing_path,
-    bash_shell,
-)
 
 
 def test__init__errors(non_existing_path, non_executable_path):

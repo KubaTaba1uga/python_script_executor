@@ -1,7 +1,4 @@
 from time import sleep
-import pytest
-
-from tests.fixtures import temp_err_buffer, bash_shell
 
 
 def test_delete(temp_err_buffer, bash_shell):

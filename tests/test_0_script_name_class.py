@@ -1,8 +1,3 @@
-import pytest
-
-from tests.fixtures import script_name_with_number, script_name_without_number
-
-
 def test_find_last_underscore(script_name_with_number):
     assert script_name_with_number._find_last_underscore() == 10
 
