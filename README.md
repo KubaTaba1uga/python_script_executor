@@ -1,4 +1,4 @@
-
+[![PyTest](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml/badge.svg)](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml)
 
 # App description 
 Python Script Executor organize bash scripts in order and executes them.
