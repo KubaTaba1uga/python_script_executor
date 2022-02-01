@@ -11,10 +11,9 @@ jobs:
         with:
           python-version: 3.9
       - name: Install dependencies
-        run: pip install coverage pytest poetry && poetry install --no-dev
+        run: pip install coverage pytest-cov pytest poetry && poetry install --no-dev
       - name: Run tests and collect coverage
         run: |
-          coverage run pytest
-          coverage xml
+          pytest --cov=./ --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
