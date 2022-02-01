@@ -44,20 +44,12 @@ class ScriptExecutor:
             self._pid = self.shell.find_subshell_pid()
         return self._pid
 
-    @pid.setter
-    def pid(self, value: int):
-        self._pid = value
-
     @property
     def exit_code(self) -> int:
         """Get exit code of last executed process"""
         if not self._exit_code:
             self._exit_code = self.shell.get_subshell_exit_code()
         return self._exit_code
-
-    @exit_code.setter
-    def exit_code(self, value: int):
-        self._exit_code = value
 
     def _create_execution_command(self) -> str:
         """Create subshell and return its PID. Script
@@ -116,8 +108,7 @@ class ScriptExecutor:
 
     def execute_script(self):
         """Execute script as separeted process"""
-        if not self.shell.process:
-            self.shell.spawn_shell()
+
         command = self._create_execution_command()
 
         self.shell.send_command(command)
