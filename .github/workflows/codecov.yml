@@ -11,7 +11,7 @@ jobs:
         with:
           python-version: 3.9
       - name: Install dependencies
-        run: pip install coverage pytest-cov pytest poetry && poetry install --no-dev
+        run: pip install coverage pytest-cov pytest poetry && poetry config virtualenvs.create false && poetry install
       - name: Run tests and collect coverage
         run: |
           pytest --cov=./ --cov-report=xml
