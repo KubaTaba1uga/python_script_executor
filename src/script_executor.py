@@ -1,7 +1,8 @@
+from typing import Optional
 from select import select
 import sys
 
-from src.output_input_controller import OutputInputController
+from src.output_input_controllers.base import OutputInputController
 from src.temporary_errors_buffer import TempErrorFile
 from src.exceptions import ShellNotSpawned
 from src.process import Process
@@ -33,16 +34,30 @@ class ScriptExecutor:
         self.shell = shell
         self.oi_controller = oi_controller
         self.errors_buffer = errors_buffer
+        self._pid: Optional[int] = None
+        self._exit_code: Optional[int] = None
 
     @property
     def pid(self) -> int:
         """Get PID of script in shell output"""
-        return self.shell.find_subshell_pid()
+        if not self._pid:
+            self._pid = self.shell.find_subshell_pid()
+        return self._pid
+
+    @pid.setter
+    def pid(self, value: int):
+        self._pid = value
 
     @property
     def exit_code(self) -> int:
         """Get exit code of last executed process"""
-        return self.shell.get_subshell_exit_code()
+        if not self._exit_code:
+            self._exit_code = self.shell.get_subshell_exit_code()
+        return self._exit_code
+
+    @exit_code.setter
+    def exit_code(self, value: int):
+        self._exit_code = value
 
     def _create_execution_command(self) -> str:
         """Create subshell and return its PID. Script
@@ -80,29 +95,24 @@ class ScriptExecutor:
             + self.shell.subshell["end"]
         )
 
-    def get_output(self, subshell_pid: int):
+    def get_output(self):
         """Get output from shell and pass it to
         output input controller"""
         output = self.shell.read_output_line()
-        self.oi_controller.stdout = self.shell, output, subshell_pid  # type:ignore
+        self.oi_controller.stdout = self, output
 
-    def get_errors(self, subshell_pid: int):
+    def get_errors(self):
         """Get errors from errors temporary file
         and pass it to output input controller"""
         if self.errors_buffer.exist():
-            self.oi_controller.stderr = (  # type:ignore
-                self.shell,
+            self.oi_controller.stderr = (
+                self,
                 self.errors_buffer.read(),
-                subshell_pid,
             )
 
-    def get_input(self, subshell_pid: int):
+    def get_input(self):
         """Get input from user and pass it to shell"""
-        self.oi_controller.stdin = (
-            self.shell,
-            "",
-            subshell_pid,
-        )
+        self.oi_controller.stdin = self, ""
 
     def execute_script(self):
         """Execute script as separeted process"""
@@ -119,12 +129,12 @@ class ScriptExecutor:
             while Process.is_alive(pid) or self.shell.lastline:
                 # Create event loop for blocking
                 #    input/output operations
-                readers, writers, _ = select([sys.stdin], [sys.stdout], [], 0.1)
+                readers, writers, _ = select([sys.stdin], [sys.stdout], [], 1)
                 for fd in readers + writers:
                     if fd is sys.stdin:
-                        self.get_input(pid)
+                        self.get_input()
                     elif fd is sys.stdout:
-                        self.get_output(pid)
-                self.get_errors(pid)
+                        self.get_output()
+                self.get_errors()
 
             self.oi_controller.show_status(self.script, self.exit_code)

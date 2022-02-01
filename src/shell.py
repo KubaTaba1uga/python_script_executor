@@ -8,10 +8,9 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
-from typing import Dict, Generator, Union
+from typing import Dict, Generator, Union, Optional
 from pathlib import Path
 import abc
-import sys
 
 import pexpect
 
@@ -38,7 +37,7 @@ class Shell(abc.ABC):
 
         self.timeout = timeout
 
-        self.process = None
+        self.process: Optional[pexpect.spawn] = None
 
         self.lastline = ""
 
@@ -84,7 +83,7 @@ class Shell(abc.ABC):
 
     def send_command(self, command: str):
         """Send command to shell"""
-        self.process.sendline(command)
+        self.process.sendline(command)  # type:ignore
 
     def terminate(self):
         """Terminate shell, when no scripts are left for execution"""
@@ -94,27 +93,27 @@ class Shell(abc.ABC):
         """Read all output lines from shell. If output is not
         recived before timeout return what has left"""
         try:
-            self.process.expect(pexpect.EOF, timeout=timeout)
+            self.process.expect(pexpect.EOF, timeout=timeout)  # type:ignore
         except pexpect.TIMEOUT as err:
-            if not self.process.before:
+            if not self.process.before:  # type:ignore
                 raise NoOutputProduced(
                     f"There is no output produced by {script_name}"
                 ) from err
 
-        return self.process.before
+        return self.process.before  # type:ignore
 
     def read_output_line(self) -> str:
         try:
-            self.lastline = self.process.readline()
+            self.lastline = self.process.readline()  # type:ignore
         except pexpect.TIMEOUT:
             if (
-                self.lastline == self.process.before
-                or self.lastline in self.process.before
-                or self.process.before in self.lastline
+                self.lastline == self.process.before  # type:ignore
+                or self.lastline in self.process.before  # type:ignore
+                or self.process.before in self.lastline  # type:ignore
             ):
                 self.lastline = ""
             else:
-                self.lastline = self.process.before
+                self.lastline = self.process.before  # type:ignore
         return self.lastline
 
 

@@ -4,7 +4,7 @@ from src.shell import SubShell
 from src.module import Module
 from src.script_executor import ScriptExecutor
 from src.temporary_errors_buffer import TempErrorFile
-from src.output_input_controller import OutputInputController
+from src.output_input_controllers.base import OutputInputController
 
 
 def main(

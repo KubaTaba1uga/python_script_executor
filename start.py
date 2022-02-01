@@ -37,7 +37,7 @@ from src.cli_utils import (
     parse_cli_errors_directory,
     find_shell,
 )
-from src.output_input_controller import TerminalOutputInput
+from src.output_input_controllers.terminal_oi import TerminalOutputInput
 from src.exceptions import FileNotFound, FileNotExecutable
 
 if __name__ == "__main__":
