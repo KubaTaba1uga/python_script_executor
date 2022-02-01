@@ -48,8 +48,10 @@ from src.output_input_controller import TerminalOutputInput
 
 if __name__ == "__main__":
     default_output_input_controller = TerminalOutputInput()
+
     # By default scripts are held in ./scripts directory
     default_scripts_directory = Path(sys.argv[0]).parent.joinpath("scripts")
+
     # By default errors buffer is used in /tmp directory
     default_error_buffer_directory = Path("/tmp")
 
@@ -61,14 +63,14 @@ if __name__ == "__main__":
 
     scripts_directory = parse_cli_scripts_directory(args) or default_scripts_directory
 
-    shell_class = parse_cli_shell(args)
+    shell = parse_cli_shell(args)
 
     errors_directory = (
         parse_cli_errors_directory(args) or default_error_buffer_directory
     )
 
     main(
-        shell=shell_class,
+        shell=shell,
         script_folder_path=scripts_directory,
         oi_controller=output_input_controller,
         errors_buffer_path=errors_directory,

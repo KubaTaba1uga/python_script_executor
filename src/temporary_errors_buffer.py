@@ -13,7 +13,7 @@ class TempErrorFile:
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tryceback):
+    def __exit__(self, _exc_type, _exc_value, _exc_tryceback):
         self.delete()
 
     def read(self):

@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING
-from typing import Tuple
+from typing import Tuple, List, Dict
 from time import sleep
 import abc
 import sys
 
 from src.process import Process
 from src.utils import (
+    format_indent,
     print_error,
     print_info,
     print_success,
@@ -49,20 +50,27 @@ class OutputInputController(abc.ABC):
     Use descriptors to override abstract class properties.
     """
 
+    scripts_statuses: List[Dict[str, int]] = []
+
     @classmethod
     def show_success(cls, script_name: str):
-        print_("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
+        print_(format_indent(f"Execution of {script_name} succeed" + "\n"))
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print_("\n" + f"Execution of {script_name} failed" + "\n" * 2)
+        print_(format_indent(f"Execution of {script_name} failed" + "\n"))
 
     @classmethod
     def show_status(cls, script_name: str, exit_code: int):
-        if exit_code == 0:
-            cls.show_success(script_name)
-        else:
-            cls.show_failure(script_name)
+        cls.scripts_statuses.append({script_name: exit_code})
+        print("\n" * 2 + "Scripts Summary:")
+        for script in cls.scripts_statuses:
+            for script_name, exit_code in script.items():
+                if exit_code == 0:
+                    cls.show_success(script_name)
+                else:
+                    cls.show_failure(script_name)
+        print(end="\n" * 2)
 
     @property
     @classmethod
@@ -127,7 +135,7 @@ class TerminalErrorDescriptor(BaseDescriptor):
             + f"{str_value}"
             + "\n"
             + "ERROR!!!"
-            + "\n" * 2
+            + "\n"
         )
 
         instance.__dict__[self.name] = str_value
@@ -166,7 +174,7 @@ class TerminalErrorDescriptorColor(BaseDescriptor):
             + f"{str_value}"
             + "\n"
             + "ERROR!!!"
-            + "\n" * 2
+            + "\n"
         )
 
         instance.__dict__[self.name] = str_value
@@ -177,12 +185,12 @@ class TerminalOutputInputColor(OutputInputController):
     stdout = TerminalOutputDescriptorColor()
     stderr = TerminalErrorDescriptorColor()
 
-    command_line_argument = "terminal&color"
+    command_line_argument = "terminalcolor"
 
     @classmethod
     def show_success(cls, script_name: str):
-        print_success("\n" + f"Execution of {script_name} succeed" + "\n" * 2)
+        print_success(format_indent(f"Execution of {script_name} succeed" + "\n"))
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print_error("\n" + f"Execution of {script_name} failed" + "\n" * 2)
+        print_error(format_indent(f"Execution of {script_name} failed" + "\n"))

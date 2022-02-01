@@ -1,6 +1,4 @@
-from contextlib import contextmanager
 from pathlib import Path
-from io import StringIO
 import sys
 
 import pytest

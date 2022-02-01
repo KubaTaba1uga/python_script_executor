@@ -47,8 +47,6 @@ class _ScriptName:
 class Script:
     """Script which know how to read  itself"""
 
-    SHEBANG = "#!"
-
     SHEBANG_REGEX = re.compile(r"#![/\\](?:(?!\.\s+)\S)+(\S)?(\.)?")
 
     def __init__(self, name: str, folder_path: Path):

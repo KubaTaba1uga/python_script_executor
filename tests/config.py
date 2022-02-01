@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from pathlib import Path
 import sys
 import os
@@ -32,7 +31,7 @@ class replace_stdin:
 
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tryceback):
+    def __exit__(self, _exc_type, _exc_value, _exc_tryceback):
 
         sys.stdin.close()
 

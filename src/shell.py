@@ -8,9 +8,10 @@ Environment, in which scripts will be executed in,
                                                   before script execution
 
 """
-from typing import Dict, Generator
+from typing import Dict, Generator, Union
 from pathlib import Path
 import abc
+import sys
 
 import pexpect
 
@@ -27,7 +28,7 @@ class Shell(abc.ABC):
     """Shell module is responsible for spawning the  environment
     in which scripts will be executed and for communicating with them."""
 
-    def __init__(self, timeout: int = 5):
+    def __init__(self, timeout: Union[int, float] = 1):
         path = Path(self.path)
 
         if not path.exists():
@@ -45,14 +46,15 @@ class Shell(abc.ABC):
         while line := self.read_output_line():
             yield line
 
-    def __call__(self, timeout: int):
+    def __call__(self, timeout: Union[int, float]):
         self.timeout = timeout
+        return self
 
     def __enter__(self):
         self.spawn_shell(self.timeout)
         return self
 
-    def __exit__(self, exc_type, exc_value, exc_tryceback):
+    def __exit__(self, _exc_type, _exc_value, _exc_tryceback):
         self.terminate()
 
     @property

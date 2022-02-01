@@ -67,8 +67,7 @@ def parse_cli_shell(args: dict) -> SubShell:
         for shell in SubShell.__subclasses__():
             if args["<shell_name>"] == shell.command_line_argument:
                 try:
-                    shell()
-                    return shell
+                    return shell()
                 except FileNotFound:
                     pass
                 except FileNotExecutable:
@@ -87,9 +86,7 @@ def parse_cli_shell(args: dict) -> SubShell:
     else:
         for shell in SubShell.__subclasses__():
             try:
-                shell()
-                return shell
-                break
+                return shell()
             except FileNotFound:
                 pass
             except FileNotExecutable:

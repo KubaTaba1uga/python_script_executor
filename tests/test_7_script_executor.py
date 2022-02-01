@@ -9,17 +9,10 @@ from tests.fixtures import (
     terminal_oi,
     temp_err_buffer,
     script_executor,
-    script_create_file,
 )
 from tests.config import replace_stdin
 from src.script_executor import ScriptExecutor
 from src.exceptions import ShellNotSpawned
-
-
-@pytest.fixture
-def executor_create_file(bash_shell, script_create_file, terminal_oi, temp_err_buffer):
-    bash_shell.spawn_shell(timeout=0.2)
-    return ScriptExecutor(script_create_file, bash_shell, terminal_oi, temp_err_buffer)
 
 
 def test__init__errors(bash_output_script, bash_shell, terminal_oi, temp_err_buffer):
