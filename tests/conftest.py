@@ -2,7 +2,7 @@ from subprocess import Popen
 from pathlib import Path
 import pytest
 
-from src.output_input_controllers.terminal_oi import TerminalOutputInput
+from src.output_input_controllers.controllers import TerminalOutputInput
 from src.temporary_errors_buffer import TempErrorFile
 from src.script_executor import ScriptExecutor
 from src.script import _ScriptName
