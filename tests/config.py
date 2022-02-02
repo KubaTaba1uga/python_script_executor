@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from io import StringIO
 import sys
-
+import os
 
 GOOD_SCRIPTS_DIR = Path("./tests/scripts/good_scripts")
 
@@ -35,3 +35,13 @@ def replace_stdin(notification):
     sys.stdin = StringIO(notification)
     yield None
     sys.stdin = org_stdin
+
+
+@contextmanager
+def open_log_with_cleanup(file_path: Path, mode: str = "r"):
+    """Delete file and its parent directory after usage"""
+    f = open(file_path, mode)
+    yield f
+    f.close()
+    os.remove(file_path)
+    os.rmdir(file_path.parent)

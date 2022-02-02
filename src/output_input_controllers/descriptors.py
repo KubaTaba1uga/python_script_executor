@@ -5,10 +5,8 @@ import sys
 from src.output_input_controllers.base import BaseDescriptor
 from src.output_input_controllers.utils import (
     create_logs_directory,
+    format_error_output,
     get_log_file_path,
-    format_error,
-)
-from src.utils import (
     print_error,
     print_info,
     print_,
@@ -51,7 +49,7 @@ class TerminalErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
         _, str_value = values
 
-        print_(format_error(str_value))
+        print_(format_error_output(str_value))
 
         instance.__dict__[self.name] = str_value
 
@@ -60,7 +58,7 @@ class TerminalErrorDescriptorColor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
         _, str_value = values
 
-        print_error(format_error(str_value))
+        print_error(format_error_output(str_value))
 
         instance.__dict__[self.name] = str_value
 
@@ -85,7 +83,7 @@ class TerminalFileErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
         script_executor, str_value = values
 
-        errors = format_error(str_value)
+        errors = format_error_output(str_value)
 
         log_path = get_log_file_path(str(script_executor.script))
 

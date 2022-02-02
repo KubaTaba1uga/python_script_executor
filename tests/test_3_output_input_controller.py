@@ -1,41 +1,104 @@
-from src.output_input_controllers.base import OutputInputController
+from colorama import Fore
 
-from tests.config import replace_stdin
+from src.output_input_controllers.utils import get_log_file_path
 
-
-def test_terminal_output(bash_shell):
-    for subclass in OutputInputController.__subclasses__():
-        terminal_oi = subclass()
-        with bash_shell as shell:
-            output_notification = "This is standard output notification"
-            terminal_oi.stdout = shell, output_notification
-            assert terminal_oi.stdout == output_notification
+from tests.config import replace_stdin, open_log_with_cleanup
 
 
-def test_terminal_error(bash_shell):
-    for subclass in OutputInputController.__subclasses__():
-        terminal_oi = subclass()
-        with bash_shell as shell:
-            error_notification = "This is standard error notification"
-            terminal_oi.stderr = shell, error_notification
-            assert terminal_oi.stderr == error_notification
+def test_terminal_oi_stdout(script_executor_terminal_oi, capfd):
+    OUTPUT = "This is standard output notification"
+    script_executor = script_executor_terminal_oi
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, OUTPUT
+        out, err = capfd.readouterr()
+        assert OUTPUT in out
 
 
-def test_terminal_input(bash_shell):
-    input_notification = "This is standard input"
-    for subclass in OutputInputController.__subclasses__():
-        terminal_oi = subclass()
-        with bash_shell as shell:
-            with replace_stdin(input_notification):
-                shell.shell = shell
-                terminal_oi.stdin = shell, None
-                assert terminal_oi.stdin == input_notification
-                # Prettify pytest -s formatting
-                print(terminal_oi.stdin)
+def test_terminal_oi_stdin(script_executor_terminal_oi):
+    INPUT = "This is standard input notification"
+    script_executor = script_executor_terminal_oi
+
+    with replace_stdin(INPUT):
+        with script_executor.shell:
+            script_executor.oi_controller.stdin = script_executor, None
+
+    assert script_executor.oi_controller.stdin == INPUT
 
 
-def test_command_line_flags():
-    """Ensure each OIController subclass has
-    command line flag implemented properly"""
-    for cls in OutputInputController.__subclasses__():
-        assert cls.command_line_argument is not None
+def test_terminal_oi_stderr(script_executor_terminal_oi, capfd):
+    ERROR = "This is standard output notification"
+    script_executor = script_executor_terminal_oi
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, ERROR
+        out, err = capfd.readouterr()
+        assert ERROR in out
+
+
+def test_terminal_color_oi_stdout(script_executor_terminal_color_oi, capfd):
+    OUTPUT = Fore.GREEN + "This is standard output notification"
+    script_executor = script_executor_terminal_color_oi
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, OUTPUT
+        out, err = capfd.readouterr()
+        assert OUTPUT in out
+
+
+def test_terminal_color_oi_stdin(script_executor_terminal_color_oi):
+    INPUT = "This is standard input notification"
+    script_executor = script_executor_terminal_color_oi
+
+    with replace_stdin(INPUT):
+        with script_executor.shell:
+            script_executor.oi_controller.stdin = script_executor, None
+
+    assert script_executor.oi_controller.stdin == INPUT
+
+
+def test_terminal_color_oi_stderr(script_executor_terminal_color_oi, capfd):
+    ERROR = Fore.RED + "This is standard output notification"
+    script_executor = script_executor_terminal_color_oi
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, ERROR
+        out, err = capfd.readouterr()
+        assert ERROR in out
+
+
+def test_terminal_file_oi_stdout(script_executor_terminal_file_oi, capfd):
+    OUTPUT = "This is standard output notification"
+    script_executor = script_executor_terminal_file_oi
+    log_path = get_log_file_path(str(script_executor.script))
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, OUTPUT
+        out, err = capfd.readouterr()
+        assert OUTPUT in out
+        with open_log_with_cleanup(log_path) as f:
+            assert OUTPUT in f.read()
+
+
+def test_terminal_file_oi_stdin(script_executor_terminal_file_oi):
+    INPUT = "This is standard input notification"
+    script_executor = script_executor_terminal_file_oi
+
+    with replace_stdin(INPUT):
+        with script_executor.shell:
+            script_executor.oi_controller.stdin = script_executor, None
+
+    assert script_executor.oi_controller.stdin == INPUT
+
+
+def test_terminal_file_oi_stderr(script_executor_terminal_file_oi, capfd):
+    ERROR = "This is standard error notification"
+    script_executor = script_executor_terminal_file_oi
+    log_path = get_log_file_path(str(script_executor.script))
+
+    with script_executor.shell:
+        script_executor.oi_controller.stdout = script_executor, ERROR
+        out, err = capfd.readouterr()
+        assert ERROR in out
+        with open_log_with_cleanup(log_path) as f:
+            assert ERROR in f.read()

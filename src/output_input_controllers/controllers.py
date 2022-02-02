@@ -8,7 +8,7 @@ from src.output_input_controllers.descriptors import (
     TerminalOutputDescriptorColor,
     TerminalErrorDescriptorColor,
 )
-from src.utils import (
+from src.output_input_controllers.utils import (
     format_indent,
     print_error,
     print_success,

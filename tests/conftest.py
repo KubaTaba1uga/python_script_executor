@@ -2,8 +2,12 @@ from subprocess import Popen
 from pathlib import Path
 import pytest
 
-from src.output_input_controllers.controllers import TerminalOutputInput
 from src.temporary_errors_buffer import TempErrorFile
+from src.output_input_controllers.controllers import (
+    TerminalOutputInput,
+    TerminalOutputInputColor,
+    TerminalFileOutputInput,
+)
 from src.script_executor import ScriptExecutor
 from src.script import _ScriptName
 from src.shell import BashShell
@@ -77,6 +81,16 @@ def terminal_oi():
 
 
 @pytest.fixture
+def terminal_color_oi():
+    return TerminalOutputInputColor()
+
+
+@pytest.fixture
+def terminal_file_oi():
+    return TerminalFileOutputInput()
+
+
+@pytest.fixture
 def temp_err_buffer():
     return TempErrorFile(ERRORS_BUFFER_DIR)
 
@@ -85,3 +99,31 @@ def temp_err_buffer():
 def script_executor(bash_shell, bash_output_script, terminal_oi, temp_err_buffer):
     bash_shell.spawn_shell(timeout=0.2)
     return ScriptExecutor(bash_output_script, bash_shell, terminal_oi, temp_err_buffer)
+
+
+@pytest.fixture
+def script_executor_terminal_oi(
+    bash_shell, bash_output_script, terminal_oi, temp_err_buffer
+):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(bash_output_script, bash_shell, terminal_oi, temp_err_buffer)
+
+
+@pytest.fixture
+def script_executor_terminal_color_oi(
+    bash_shell, bash_output_script, terminal_color_oi, temp_err_buffer
+):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(
+        bash_output_script, bash_shell, terminal_color_oi, temp_err_buffer
+    )
+
+
+@pytest.fixture
+def script_executor_terminal_file_oi(
+    bash_shell, bash_output_script, terminal_file_oi, temp_err_buffer
+):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(
+        bash_output_script, bash_shell, terminal_file_oi, temp_err_buffer
+    )
