@@ -97,7 +97,7 @@ def test_terminal_file_oi_stderr(script_executor_terminal_file_oi, capfd):
     log_path = get_log_file_path(str(script_executor.script))
 
     with script_executor.shell:
-        script_executor.oi_controller.stdout = script_executor, ERROR
+        script_executor.oi_controller.stderr = script_executor, ERROR
         out, err = capfd.readouterr()
         assert ERROR in out
         with open_log_with_cleanup(log_path) as f:
