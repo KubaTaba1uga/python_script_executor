@@ -1,7 +1,7 @@
 #!/bin/env python
 """
         Usage:
-                doc_opt_test.py [-s SHELL] [-d SCRIPTS_DIRECTORY] [-o OUTPUT_INPUT_CONTROLLER] [-e ERRORS_BUFFER_PATH]
+                start.py [-s SHELL] [-d SCRIPTS_DIRECTORY] [-o OUTPUT_INPUT_CONTROLLER] [-e ERRORS_BUFFER_PATH]
 
         Options:
                 -s SHELL                        Shell by which scripts will be executed.
@@ -17,8 +17,6 @@
                                                red and redirect stidn to user terminal.
                         3. terminalfile     print and save output and errors to files with redirected
                                                stdin to user terminal.
-                        4. file             save output and errors to files and simulate input with 'y'
-                                               to bypass all prompts with yes.
 
                 Shell names:
                         1. bash             execute scripts by /bin/bash.
@@ -37,10 +35,11 @@ from src.cli_utils import (
     parse_cli_errors_directory,
     find_shell,
 )
-from src.output_input_controllers.terminal_oi import TerminalOutputInput
+from src.output_input_controllers.controllers import TerminalOutputInputColor
+
 
 if __name__ == "__main__":
-    default_output_input_controller = TerminalOutputInput()
+    default_output_input_controller = TerminalOutputInputColor()
 
     # By default scripts are held in ./scripts directory
     default_scripts_directory = Path(sys.argv[0]).parent.joinpath("scripts")

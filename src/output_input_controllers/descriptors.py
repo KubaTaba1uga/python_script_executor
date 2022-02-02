@@ -1,7 +1,13 @@
 from typing import Tuple, TYPE_CHECKING
 import sys
 
+
 from src.output_input_controllers.base import BaseDescriptor
+from src.output_input_controllers.utils import (
+    create_logs_directory,
+    get_log_file_path,
+    format_error,
+)
 from src.utils import (
     print_error,
     print_info,
@@ -45,20 +51,7 @@ class TerminalErrorDescriptor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
         _, str_value = values
 
-        double_newline = "\n" * 2
-
-        tab = " " * 4
-
-        print_(
-            double_newline
-            + "ERROR!!!"
-            + double_newline
-            + tab
-            + f"{str_value}"
-            + "\n"
-            + "ERROR!!!"
-            + "\n"
-        )
+        print_(format_error(str_value))
 
         instance.__dict__[self.name] = str_value
 
@@ -67,19 +60,38 @@ class TerminalErrorDescriptorColor(BaseDescriptor):
     def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
         _, str_value = values
 
-        double_newline = "\n" * 2
+        print_error(format_error(str_value))
 
-        tab = " " * 4
+        instance.__dict__[self.name] = str_value
 
-        print_error(
-            double_newline
-            + "ERROR!!!"
-            + double_newline
-            + tab
-            + f"{str_value}"
-            + "\n"
-            + "ERROR!!!"
-            + "\n"
-        )
+
+class TerminalFileOutputDescriptor(BaseDescriptor):
+    @create_logs_directory
+    def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
+        script_executor, str_value = values
+
+        log_path = get_log_file_path(str(script_executor.script))
+
+        with open(log_path, "a") as log:
+            log.write(str_value)
+
+        print_(str_value)
+
+        instance.__dict__[self.name] = str_value
+
+
+class TerminalFileErrorDescriptor(BaseDescriptor):
+    @create_logs_directory
+    def __set__(self, instance, values: Tuple["ScriptExecutor", str]):
+        script_executor, str_value = values
+
+        errors = format_error(str_value)
+
+        log_path = get_log_file_path(str(script_executor.script))
+
+        with open(log_path, "a") as log:
+            log.write(errors)
+
+        print_(errors)
 
         instance.__dict__[self.name] = str_value

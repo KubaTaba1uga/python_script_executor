@@ -35,7 +35,7 @@ def parse_cli_output_input_controller(args: dict) -> Optional[OutputInputControl
 
         notify_mistake(
             "Output input controller named ",
-            f'"{args["<controller_name>"]}"',
+            f'"{args["-o"]}"',
             " was not found!!!",
         )
 

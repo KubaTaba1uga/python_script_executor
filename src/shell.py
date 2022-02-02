@@ -105,7 +105,9 @@ class Shell(abc.ABC):
     def read_output_line(self) -> str:
         try:
             self.lastline = self.process.readline()  # type:ignore
+
         except pexpect.TIMEOUT:
+            # Don't print the same in a loop
             if (
                 self.lastline == self.process.before  # type:ignore
                 or self.lastline in self.process.before  # type:ignore
@@ -114,6 +116,7 @@ class Shell(abc.ABC):
                 self.lastline = ""
             else:
                 self.lastline = self.process.before  # type:ignore
+
         return self.lastline
 
 

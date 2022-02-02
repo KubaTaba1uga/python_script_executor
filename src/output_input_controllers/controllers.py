@@ -1,6 +1,10 @@
 from src.output_input_controllers.base import OutputInputController
 from src.output_input_controllers.descriptors import (
     SimpleTerminalInputDescriptor,
+    TerminalOutputDescriptor,
+    TerminalErrorDescriptor,
+    TerminalFileOutputDescriptor,
+    TerminalFileErrorDescriptor,
     TerminalOutputDescriptorColor,
     TerminalErrorDescriptorColor,
 )
@@ -9,6 +13,14 @@ from src.utils import (
     print_error,
     print_success,
 )
+
+
+class TerminalOutputInput(OutputInputController):
+    stdin = SimpleTerminalInputDescriptor()
+    stdout = TerminalOutputDescriptor()
+    stderr = TerminalErrorDescriptor()
+
+    command_line_argument = "terminal"
 
 
 class TerminalOutputInputColor(OutputInputController):
@@ -25,3 +37,11 @@ class TerminalOutputInputColor(OutputInputController):
     @classmethod
     def show_failure(cls, script_name: str):
         print_error(format_indent(f"Execution of {script_name} failed" + "\n"))
+
+
+class TerminalFileOutputInput(OutputInputController):
+    stdin = SimpleTerminalInputDescriptor()
+    stdout = TerminalFileOutputDescriptor()
+    stderr = TerminalFileErrorDescriptor()
+
+    command_line_argument = "terminalfile"
