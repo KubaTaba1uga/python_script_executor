@@ -68,8 +68,8 @@ def test_get_output(script_executor_output):
                 output_not_found = False
                 break
 
-            # Allow only for 100 iterations
-            if i < 100:
+            # Allow only for 1000 checks
+            if i < 1000:
                 i += 1
             else:
                 break
@@ -98,8 +98,8 @@ def test_get_error(script_executor_error):
             except KeyError:
                 pass
 
-            # Allow only for 100 iterations
-            if i < 100:
+            # Allow only for 1000 checks
+            if i < 1000:
                 i += 1
             else:
                 break
