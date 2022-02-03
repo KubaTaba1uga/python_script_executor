@@ -2,8 +2,13 @@
 [![codecov](https://codecov.io/gh/KubaTaba1uga/python_script_executor/branch/master/graph/badge.svg?token=BHLC73ZGK0)](https://codecov.io/gh/KubaTaba1uga/python_script_executor)
 
 # App description 
-Python Script Executor organize bash scripts in order and executes them.
+Python Script Executor organize scripts in order and executes them.
 In case of error or input requirement, output input controller class perform desired actions.
+
+Tested interpreters:
+
+	- bash
+	- python
 
 # App installation
 
