@@ -22,6 +22,6 @@ def test_script_find_shebang_path(script_shebang):
     assert script_shebang.find_shebang_path() == GOOD_SCRIPTS["shebang"]["shebang_path"]
 
 
-def test_script_cant_find_shebang_path(bad_script):
+def test_script_cant_find_shebang_path(script_no_shebang):
     with pytest.raises(NoShebangError):
-        bad_script.find_shebang_path()
+        script_no_shebang.find_shebang_path()

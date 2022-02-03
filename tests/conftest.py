@@ -34,6 +34,26 @@ def script_shebang():
 
 
 @pytest.fixture
+def script_input():
+    return Script(GOOD_SCRIPTS["input"]["name"], GOOD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
+def script_no_shebang():
+    return Script(BAD_SCRIPTS["no_shebang"]["name"], BAD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
+def script_error():
+    return Script(BAD_SCRIPTS["error"]["name"], BAD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
+def script_echo():
+    return Script(BAD_SCRIPTS["echo"]["name"], BAD_SCRIPTS["dir_path"])
+
+
+@pytest.fixture
 def bash_shell():
     return BashShell()
 
@@ -56,11 +76,6 @@ def script_name_with_number():
 @pytest.fixture
 def script_name_without_number():
     return _ScriptName(SCRIPT_WITHOUT_NUMBER_NAME)
-
-
-@pytest.fixture
-def bad_script():
-    return Script(BAD_SCRIPTS["no_shebang"]["name"], BAD_SCRIPTS["dir_path"])
 
 
 @pytest.fixture
@@ -127,3 +142,21 @@ def script_executor_terminal_file_oi(
     return ScriptExecutor(
         bash_output_script, bash_shell, terminal_file_oi, temp_err_buffer
     )
+
+
+@pytest.fixture
+def script_executor_error(bash_shell, script_error, terminal_oi, temp_err_buffer):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(script_error, bash_shell, terminal_oi, temp_err_buffer)
+
+
+@pytest.fixture
+def script_executor_output(bash_shell, script_echo, terminal_oi, temp_err_buffer):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(script_echo, bash_shell, terminal_oi, temp_err_buffer)
+
+
+@pytest.fixture
+def script_executor_input(bash_shell, script_input, terminal_oi, temp_err_buffer):
+    bash_shell.spawn_shell(timeout=0.2)
+    return ScriptExecutor(script_input, bash_shell, terminal_oi, temp_err_buffer)

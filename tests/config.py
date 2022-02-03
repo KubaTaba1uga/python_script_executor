@@ -25,6 +25,8 @@ GOOD_SCRIPTS = {
 BAD_SCRIPTS = {
     "no_shebang": {"name": "bash_no_shebang.sh", "shebang_path": ""},
     "create_file": {"name": "create_file.sh"},
+    "echo": {"name": "bash_echo_This_is_standard_notification.sh"},
+    "error": {"name": "bash_error.sh"},
     "dir_path": BAD_SCRIPTS_DIR,
 }
 
