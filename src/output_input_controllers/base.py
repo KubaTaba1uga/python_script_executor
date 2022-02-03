@@ -4,6 +4,7 @@ import abc
 
 from src.output_input_controllers.utils import (
     format_indent,
+    ask_to_exit,
     print_,
 )
 
@@ -55,16 +56,35 @@ class OutputInputController(abc.ABC):
         print_(format_indent(f"Execution of {script_name} failed" + "\n"))
 
     @classmethod
-    def show_status(cls, script_name: str, exit_code: int):
-        cls.scripts_statuses.append({script_name: exit_code})
+    def ask_to_exit(cls, script_name: str):
+        if ask_to_exit():
+            exit(-1)
+
+    @classmethod
+    def print_progress(cls):
         print("\n" * 2 + "Scripts Summary:")
+
         for script in cls.scripts_statuses:
             for script_name, exit_code in script.items():
                 if exit_code == 0:
                     cls.show_success(script_name)
                 else:
                     cls.show_failure(script_name)
+
         print(end="\n" * 2)
+
+    @classmethod
+    def show_status(cls, script_executor: "ScriptExecutor"):
+
+        script_name = str(script_executor.script)
+        exit_code = script_executor.exit_code
+
+        cls.scripts_statuses.append({script_name: exit_code})
+
+        cls.print_progress()
+
+        if exit_code != 0:
+            cls.ask_to_exit(script_name)
 
     @property
     @classmethod

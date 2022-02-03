@@ -42,17 +42,14 @@ def format_error_output(output: str) -> str:
 
     double_newline = "\n" * 2
 
-    tab = " " * 4
-
     return (
         double_newline
         + "ERROR!!!"
         + double_newline
-        + tab
         + f"{output}"
-        + "\n"
+        + double_newline
         + "ERROR!!!"
-        + "\n"
+        + double_newline
     )
 
 
@@ -94,3 +91,19 @@ def print_error(output: str):
 def print_success(output: str):
     """Print success notification on BLUE"""
     print_(format_success(output))
+
+
+def ask_to_exit() -> bool:
+    """If user would like to exit return True
+    if not return False"""
+
+    question = "Would You like to stop scripts execution? (y/[n])"
+
+    choices = {"yes": "y", "no": "n", "default": ""}
+
+    while True:
+        anwser = input(question)
+        if anwser in choices.values():
+            return anwser == choices["yes"]
+        else:
+            print_("Wrong input value!!! Type 'y' or 'n'")

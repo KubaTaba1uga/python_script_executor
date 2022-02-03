@@ -128,4 +128,4 @@ class ScriptExecutor:
                         self.get_output()
                 self.get_errors()
 
-            self.oi_controller.show_status(self.script, self.exit_code)
+            self.oi_controller.show_status(self)
