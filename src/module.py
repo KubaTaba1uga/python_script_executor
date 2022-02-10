@@ -24,7 +24,6 @@ class Module:
         return [
             Script(script, self.scripts_folder)
             for script in os.listdir(self.scripts_folder)
-            # As github doesn't allow for empty folders, avoid executing empty folder holder
             if script[0] != "."
         ]
 
