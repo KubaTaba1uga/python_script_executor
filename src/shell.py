@@ -15,11 +15,11 @@ import abc
 import pexpect
 
 from src.exceptions import (
-    FileNotFound,
-    FileNotExecutable,
     NoOutputProduced,
-    NoPidError,
+    FileNotExecutable,
     NoExitCodeError,
+    FileNotFound,
+    NoPidError,
 )
 
 
