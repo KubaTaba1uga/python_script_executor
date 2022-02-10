@@ -4,9 +4,9 @@ from pathlib import Path
 
 from colorama import Fore, Style
 
-from src.output_input_controllers.base import OutputInputController
-from src.exceptions import FileNotExecutable, FileNotFound
 from src.shell import SubShell
+from src.exceptions import FileNotExecutable, FileNotFound
+from src.output_input_controllers.base import OutputInputController
 
 
 def _notify(output: str):

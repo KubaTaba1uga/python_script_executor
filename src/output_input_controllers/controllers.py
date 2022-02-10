@@ -1,19 +1,17 @@
 from src.output_input_controllers.base import OutputInputController
 from src.output_input_controllers.descriptors import (
     SimpleTerminalInputDescriptor,
-    TerminalOutputDescriptorColor,
-    TerminalFileOutputDescriptor,
-    TerminalErrorDescriptorColor,
-    TerminalFileErrorDescriptor,
     TerminalOutputDescriptor,
     TerminalErrorDescriptor,
+    TerminalFileOutputDescriptor,
+    TerminalFileErrorDescriptor,
+    TerminalOutputDescriptorColor,
+    TerminalErrorDescriptorColor,
 )
 from src.output_input_controllers.utils import (
-    write_to_summary,
-    format_success,
-    format_failure,
-    print_success,
+    format_indent,
     print_error,
+    print_success,
 )
 
 
@@ -34,11 +32,11 @@ class TerminalOutputInputColor(OutputInputController):
 
     @classmethod
     def show_success(cls, script_name: str):
-        print_success(format_success(script_name))
+        print_success(format_indent(f"Execution of {script_name} succeed" + "\n"))
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print_error(format_failure(script_name))
+        print_error(format_indent(f"Execution of {script_name} failed" + "\n"))
 
 
 class TerminalFileOutputInput(OutputInputController):
@@ -47,18 +45,3 @@ class TerminalFileOutputInput(OutputInputController):
     stderr = TerminalFileErrorDescriptor()
 
     command_line_argument = "terminalfile"
-
-    @classmethod
-    def show_progress(cls):
-        super().show_progress()
-
-        output = "Scripts Summary:" + "\n" * 2
-
-        for script in cls.scripts_statuses:
-            for script_name, exit_code in script.items():
-                if exit_code == 0:
-                    output += format_success(script_name)
-                else:
-                    output += format_failure(script_name)
-
-        write_to_summary(output)
