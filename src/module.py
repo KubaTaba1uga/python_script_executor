@@ -24,6 +24,7 @@ class Module:
         return [
             Script(script, self.scripts_folder)
             for script in os.listdir(self.scripts_folder)
+            # Avoid executing hidden files
             if script[0] != "."
         ]
 

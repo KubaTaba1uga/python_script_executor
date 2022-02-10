@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from io import StringIO
+import shutil
 import sys
 import os
 
@@ -16,9 +17,9 @@ SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
 
 GOOD_SCRIPTS = {
     "shebang": {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"},
-    "output": {"name": "bash_output_1.sh"},
+    "error": {"name": "bash_error_1.sh"},
     "input": {"name": "bash_input_2.sh"},
-    "error": {"name": "bash_error_4.sh"},
+    "output": {"name": "bash_output_4.sh"},
     "dir_path": GOOD_SCRIPTS_DIR,
 }
 
@@ -41,9 +42,8 @@ def replace_stdin(notification):
 
 @contextmanager
 def open_log_with_cleanup(file_path: Path, mode: str = "r"):
-    """Delete file and its parent directory after usage"""
+    """Delete log files and theirs parent directory after usage"""
     f = open(file_path, mode)
     yield f
     f.close()
-    os.remove(file_path)
-    os.rmdir(file_path.parent)
+    shutil.rmtree(file_path.parent)

@@ -1,6 +1,6 @@
 from colorama import Fore
 
-from src.output_input_controllers.utils import get_log_file_path
+from src.output_input_controllers.utils import get_log_file_path, create_log_name
 
 from tests.config import replace_stdin, open_log_with_cleanup
 
@@ -69,8 +69,12 @@ def test_terminal_color_oi_stderr(script_executor_terminal_color_oi, capfd):
 
 def test_terminal_file_oi_stdout(script_executor_terminal_file_oi, capfd):
     OUTPUT = "This is standard output notification"
+
     script_executor = script_executor_terminal_file_oi
-    log_path = get_log_file_path(str(script_executor.script))
+
+    log_name = create_log_name(str(script_executor.script))
+
+    log_path = get_log_file_path(log_name)
 
     with script_executor.shell:
         script_executor.oi_controller.stdout = script_executor, OUTPUT
@@ -93,8 +97,12 @@ def test_terminal_file_oi_stdin(script_executor_terminal_file_oi):
 
 def test_terminal_file_oi_stderr(script_executor_terminal_file_oi, capfd):
     ERROR = "This is standard error notification"
+
     script_executor = script_executor_terminal_file_oi
-    log_path = get_log_file_path(str(script_executor.script))
+
+    log_name = create_log_name(str(script_executor.script))
+
+    log_path = get_log_file_path(log_name)
 
     with script_executor.shell:
         script_executor.oi_controller.stderr = script_executor, ERROR

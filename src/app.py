@@ -1,10 +1,10 @@
 from pathlib import Path
 
-from src.shell import SubShell
-from src.module import Module
-from src.script_executor import ScriptExecutor
-from src.temporary_errors_buffer import TempErrorFile
 from src.output_input_controllers.base import OutputInputController
+from src.temporary_errors_buffer import TempErrorFile
+from src.script_executor import ScriptExecutor
+from src.module import Module
+from src.shell import SubShell
 
 
 def main(
