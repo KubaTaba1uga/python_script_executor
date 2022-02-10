@@ -3,7 +3,8 @@ from typing import Tuple, List, Dict
 import abc
 
 from src.output_input_controllers.utils import (
-    format_indent,
+    format_success,
+    format_failure,
     ask_to_exit,
     print_,
 )
@@ -49,11 +50,11 @@ class OutputInputController(abc.ABC):
 
     @classmethod
     def show_success(cls, script_name: str):
-        print_(format_indent(f"Execution of {script_name} succeed" + "\n"))
+        print_(format_success(script_name))
 
     @classmethod
     def show_failure(cls, script_name: str):
-        print_(format_indent(f"Execution of {script_name} failed" + "\n"))
+        print_(format_failure(script_name))
 
     @classmethod
     def ask_to_exit(cls, script_name: str):
@@ -61,7 +62,7 @@ class OutputInputController(abc.ABC):
             exit(-1)
 
     @classmethod
-    def print_progress(cls):
+    def show_progress(cls):
         print("\n" * 2 + "Scripts Summary:")
 
         for script in cls.scripts_statuses:
@@ -81,7 +82,7 @@ class OutputInputController(abc.ABC):
 
         cls.scripts_statuses.append({script_name: exit_code})
 
-        cls.print_progress()
+        cls.show_progress()
 
         if exit_code != 0:
             cls.ask_to_exit(script_name)

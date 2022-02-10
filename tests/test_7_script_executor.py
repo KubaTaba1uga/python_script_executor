@@ -118,3 +118,8 @@ def test_get_input(script_executor_input):
             script_executor_input.get_input()
 
             assert INPUT in script_executor_input.oi_controller.stdin
+
+
+def test_script_execution(script_executor_output):
+    with script_executor_output.shell as sh:
+        script_executor_output.execute_script()
