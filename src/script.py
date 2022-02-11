@@ -35,7 +35,7 @@ class _ScriptName:
         script_number = self.name[self._find_last_underscore() : self._find_last_dot()]
 
         if self.is_number(script_number):
-            return script_number
+            return int(script_number)
 
         return ""
 
