@@ -28,7 +28,7 @@ class _ScriptName:
     def _find_last_dot(self) -> int:
         return len(self.name) - self.name[::-1].find(".") - 1
 
-    def find_script_number(self) -> str:
+    def find_script_number(self) -> int:
         """Find number of the script in its name.
         If script is not numbered return empty string."""
 
@@ -37,7 +37,7 @@ class _ScriptName:
         if self.is_number(script_number):
             return int(script_number)
 
-        return ""
+        return 0
 
     def is_script_numbered(self) -> bool:
         return bool(self.find_script_number())

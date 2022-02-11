@@ -11,7 +11,7 @@ BAD_SCRIPTS_DIR = Path("./tests/scripts/bad_scripts")
 
 ERRORS_BUFFER_DIR = Path("/tmp")
 
-SCRIPT_WITH_NUMBER_NAME = "my_script_0.sh"
+SCRIPT_WITH_NUMBER_NAME = "my_script_-1.sh"
 
 SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
 

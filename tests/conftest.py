@@ -4,9 +4,9 @@ import pytest
 
 from src.temporary_errors_buffer import TempErrorFile
 from src.output_input_controllers.controllers import (
-    TerminalOutputInput,
     TerminalOutputInputColor,
     TerminalFileOutputInput,
+    TerminalOutputInput,
 )
 from src.script_executor import ScriptExecutor
 from src.script import _ScriptName
@@ -15,11 +15,11 @@ from src.module import Module
 from src.script import Script
 
 from tests.config import (
+    SCRIPT_WITHOUT_NUMBER_NAME,
+    SCRIPT_WITH_NUMBER_NAME,
+    ERRORS_BUFFER_DIR,
     GOOD_SCRIPTS,
     BAD_SCRIPTS,
-    ERRORS_BUFFER_DIR,
-    SCRIPT_WITH_NUMBER_NAME,
-    SCRIPT_WITHOUT_NUMBER_NAME,
 )
 
 
