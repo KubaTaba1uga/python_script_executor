@@ -233,7 +233,7 @@ class SubShell(Shell):
 
 
 class BashShell(SubShell):
-    path = "/usr/bin/env bash"
+    path = "/bin/bash"
 
     subshell = {"start": "(", "end": ")"}
 
