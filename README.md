@@ -1,28 +1,40 @@
 [![PyTest](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml/badge.svg?branch=master)](https://github.com/KubaTaba1uga/python_script_executor/actions/workflows/pytest.yml) 
 [![codecov](https://codecov.io/gh/KubaTaba1uga/python_script_executor/branch/master/graph/badge.svg?token=BHLC73ZGK0)](https://codecov.io/gh/KubaTaba1uga/python_script_executor)
 
-# App description 
-Python Script Executor organize scripts in order and executes them.
-In case of error or input requirement, output input controller class perform desired actions.
+# Requirements
 
-Tested interpreters:
+1. Python >=3.9
+2. Poetry
+
+Poetry installation:
+
+	python3 -m pip install poetry
+
+
+# App description 
+
+Python Script Executor organize scripts in order and executes them.
+
+In case of output or error, output controller perform desired actions.
+
+If script return non 0 exit code, app stop another scripts execution and
+ask You about desired action.
+
+Tested scripts interpreters:
 
 	- bash
 	- python
 
 # App installation
 
-Poetry:
+Execute below command inside repository directory:
 
-	python3 -m pip install poetry
-	
-App:
+	python3 -m poetry install --no-dev
 
-	cd python_script_executor
-	python3 -m poetry install
 
 # App usage 
-Copy scripts You would like to execute to python_script_executor/scripts directory.
+ 
+Copy scripts You would like to execute to <repository_location>/scripts directory.
 
 To order scripts add numbers preceded by `_` to their names ends. If numbers are missing
 scripts will be executed randomly.
@@ -35,9 +47,8 @@ Script Name Examples:
 
 To start app with default settings use:
 
-	python start.py
-	
-Or using poetry
-
 	python3 -m poetry run python start.py
 
+To show help use:
+
+	python3 -m poetry run start.py -h
