@@ -21,7 +21,7 @@
 
 
                 SHELLs:
-                       *1. bash             execute scripts by /usr/bin/env bash.
+                       *1. bash             execute scripts by /bin/bash .
 
 """
 from pathlib import Path
