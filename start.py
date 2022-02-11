@@ -1,25 +1,27 @@
-#!/bin/env python
+#!/usr/bin/env python
 """
         Usage:
-                start.py [-s SHELL] [-d SCRIPTS_DIRECTORY] [-o OUTPUT_INPUT_CONTROLLER] [-e ERRORS_BUFFER_PATH]
+                start.py [-s SHELL] [-d SCRIPTS_DIRECTORY] [-o OUTPUT_CONTROLLER] [-e ERRORS_BUFFER_PATH]
 
         Options:
                 -s SHELL                        Shell by which scripts will be executed.
                 -d SCRIPTS_DIRECTORY            Directory with scripts which will be executed.
-                -o OUTPUT_INPUT_CONTROLLER      Input/Output handler.
-                -e ERRORS_BUFFER_PATH           Path to temporary errors file buffer.
+                -e ERRORS_BUFFER_PATH           Path to temporary errors file buffer. By default "/tmp".
+                -o OUTPUT_CONTROLLER            Controll output format. See 'Choices' for possible options.
 
-        Variants:
 
-                Controller names:
-                        1. terminal         print output and errors and redirect stdin to user terminal.
-                        2. terminalcolor    print output on green, success on blue, errors and fails on
-                                               red and redirect stidn to user terminal.
-                        3. terminalfile     print and save output and errors to files with redirected
-                                               stdin to user terminal.
+        Choices:
 
-                Shell names:
-                        1. bash             execute scripts by /bin/bash.
+           * - default choice
+
+                OUTPUT_CONTROLLERs:
+                        1. terminal         print output to terminal.
+                        2. terminalfile     print output to terminal and save it to files.
+                       *3. terminalcolor    print output on green, success on blue, errors and fails on red.
+
+
+                SHELLs:
+                       *1. bash             execute scripts by /usr/bin/env bash.
 
 """
 from pathlib import Path
@@ -31,8 +33,8 @@ from src.app import main
 from src.cli_utils import (
     parse_cli_output_input_controller,
     parse_cli_scripts_directory,
-    parse_cli_shell,
     parse_cli_errors_directory,
+    parse_cli_shell,
     find_shell,
 )
 from src.output_input_controllers.controllers import TerminalOutputInputColor
@@ -41,10 +43,10 @@ from src.output_input_controllers.controllers import TerminalOutputInputColor
 if __name__ == "__main__":
     default_output_input_controller = TerminalOutputInputColor()
 
-    # By default scripts are held in ./scripts directory
+    # By default scripts are in ./scripts directory
     default_scripts_directory = Path(sys.argv[0]).parent.joinpath("scripts")
 
-    # By default errors buffer is used in /tmp directory
+    # By default errors buffer is in /tmp directory
     default_error_buffer_directory = Path("/tmp")
 
     args = docopt(__doc__)

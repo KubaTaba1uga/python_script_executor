@@ -58,18 +58,7 @@ def write_to_summary(output: str):
 
 
 def format_error_output(output: str) -> str:
-
-    double_newline = "\n" * 2
-
-    return (
-        double_newline
-        + "ERROR!!!"
-        + double_newline
-        + f"{output}"
-        + "\n"
-        + "ERROR!!!"
-        + double_newline
-    )
+    return "\n" + f"{output}" + "\n"
 
 
 def color_info(output: str) -> str:
