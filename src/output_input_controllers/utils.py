@@ -58,7 +58,7 @@ def write_to_summary(output: str):
 
 
 def format_error_output(output: str) -> str:
-    return "\n" + f"{output}" + "\n"
+    return output
 
 
 def color_info(output: str) -> str:
