@@ -14,4 +14,4 @@ cd Python-3.9.8
 
 sudo make install   
 
-rm -r -f ../Python-3.9.8
+sudo rm -r -f ../Python-3.9.8
