@@ -6,6 +6,11 @@
 1. Python >=3.9
 2. Poetry
 
+Python 3.9.8 installation:
+
+	cd .prep
+	/bin/bash install_python3_9.sh
+
 Poetry installation:
 
 	python3 -m pip install poetry
