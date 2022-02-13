@@ -17,8 +17,8 @@ SCRIPT_WITHOUT_NUMBER_NAME = "my_script.sh"
 
 GOOD_SCRIPTS = {
     "shebang": {"name": "bash_shebang_0.sh", "shebang_path": "/bin/bash"},
-    "error": {"name": "bash_error_1.sh"},
-    "input": {"name": "bash_input_2.sh"},
+    "input": {"name": "bash_input_1.sh"},
+    "error": {"name": "bash_error_3.sh"},
     "output": {"name": "bash_output_4.sh"},
     "dir_path": GOOD_SCRIPTS_DIR,
 }
