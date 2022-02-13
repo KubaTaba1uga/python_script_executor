@@ -55,8 +55,6 @@ class ScriptExecutor:
         """Create subshell and return its PID. Script
         will be executed within a subshell by command
         syntax.
-        Because of subshell child PID will be different
-        than parent shell PID.
 
         Generated PID will be used to recognize process status
         like:

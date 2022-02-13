@@ -1,12 +1,5 @@
 """
-Environment, in which scripts will be executed in,
-         is precized by script first line (shebang). Example:
-                #!/bin/bash - spawn shell /bin/bash
-                                        before script execution
-
-                #!/usr/bin/python - spawn shell /usr/bin/python
-                                                  before script execution
-
+Environment, in which scripts will be executed in.
 """
 from typing import Dict, Generator, Union, Optional
 from pathlib import Path
